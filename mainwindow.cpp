@@ -64,19 +64,19 @@ void MainWindow::openSerialPorts()
     if (serial->isOpen()){
         ui->actionDisconnect->setEnabled(true);
         estadoSerial->setText(tr("Connected to %1 : %2, %3, %4, %5, %6, %7")
-                                .arg(p.name)
-                                .arg(p.stringBaudRate)
-                                .arg(p.stringDataBits)
-                                .arg(p.stringParity)
-                                .arg(p.stringStopBits)
-                                .arg(p.stringFlowControl)
-                                .arg(p.fabricante)
-                               );
+                                  .arg(p.name)
+                                  .arg(p.stringBaudRate)
+                                  .arg(p.stringDataBits)
+                                  .arg(p.stringParity)
+                                  .arg(p.stringStopBits)
+                                  .arg(p.stringFlowControl)
+                                  .arg(p.fabricante)
+                              );
         QTimer1->start(10);
         inicializaciones();
         connectionType = SERIALCONNECTION;
     } else {
-       QMessageBox::critical(this, tr("Error"), serial->errorString());
+        QMessageBox::critical(this, tr("Error"), serial->errorString());
     }
 }
 
@@ -166,68 +166,68 @@ void MainWindow::dataRecived() //!< RECIBIR DATOS POR SERIAL
 
     for(int i=0;i<count; i++){
         switch (estadoProtocolo) {
-            case START:
-                if (incomingBuffer[i]=='U'){
-                    estadoProtocolo=HEADER_1;
-                    rxData.cheksum=0;
-                }
-                break;
-            case HEADER_1:
-                if (incomingBuffer[i]=='N')
-                   estadoProtocolo=HEADER_2;
-                else{
-                    i--;
-                    estadoProtocolo=START;
-                }
-                break;
-            case HEADER_2:
-                if (incomingBuffer[i]=='E')
-                    estadoProtocolo=HEADER_3;
-                else{
-                    i--;
-                   estadoProtocolo=START;
-                }
-                break;
-            case HEADER_3:
-                if (incomingBuffer[i]=='R')
-                    estadoProtocolo=NBYTES;
-                else{
-                    i--;
-                   estadoProtocolo=START;
-                }
-                break;
-            case NBYTES:
-                rxData.nBytes=incomingBuffer[i];
-                estadoProtocolo=TOKEN;
-                break;
-            case TOKEN:
-                if (incomingBuffer[i]==':'){
-                    estadoProtocolo=PAYLOAD;
-                    rxData.cheksum='U'^'N'^'E'^'R'^ rxData.nBytes^':';
-                    rxData.payLoad[0]=rxData.nBytes;
-                    rxData.index=1;
-                }
-                else{
-                    i--;
-                    estadoProtocolo=START;
-                }
-                break;
-            case PAYLOAD:
-                if (rxData.nBytes>1){
-                    rxData.payLoad[rxData.index++]=incomingBuffer[i];
-                    rxData.cheksum^=incomingBuffer[i];
-                }
-                rxData.nBytes--;
-                if(rxData.nBytes==0){
-                    estadoProtocolo=START;
-                    if(rxData.cheksum==incomingBuffer[i]){
-                        decodeData(&rxData.payLoad[0],SERIE);
-                    }
-                }
-                break;
-            default:
+        case START:
+            if (incomingBuffer[i]=='U'){
+                estadoProtocolo=HEADER_1;
+                rxData.cheksum=0;
+            }
+            break;
+        case HEADER_1:
+            if (incomingBuffer[i]=='N')
+                estadoProtocolo=HEADER_2;
+            else{
+                i--;
                 estadoProtocolo=START;
-                break;
+            }
+            break;
+        case HEADER_2:
+            if (incomingBuffer[i]=='E')
+                estadoProtocolo=HEADER_3;
+            else{
+                i--;
+                estadoProtocolo=START;
+            }
+            break;
+        case HEADER_3:
+            if (incomingBuffer[i]=='R')
+                estadoProtocolo=NBYTES;
+            else{
+                i--;
+                estadoProtocolo=START;
+            }
+            break;
+        case NBYTES:
+            rxData.nBytes=incomingBuffer[i];
+            estadoProtocolo=TOKEN;
+            break;
+        case TOKEN:
+            if (incomingBuffer[i]==':'){
+                estadoProtocolo=PAYLOAD;
+                rxData.cheksum='U'^'N'^'E'^'R'^ rxData.nBytes^':';
+                rxData.payLoad[0]=rxData.nBytes;
+                rxData.index=1;
+            }
+            else{
+                i--;
+                estadoProtocolo=START;
+            }
+            break;
+        case PAYLOAD:
+            if (rxData.nBytes>1){
+                rxData.payLoad[rxData.index++]=incomingBuffer[i];
+                rxData.cheksum^=incomingBuffer[i];
+            }
+            rxData.nBytes--;
+            if(rxData.nBytes==0){
+                estadoProtocolo=START;
+                if(rxData.cheksum==incomingBuffer[i]){
+                    decodeData(&rxData.payLoad[0],SERIE);
+                }
+            }
+            break;
+        default:
+            estadoProtocolo=START;
+            break;
         }
     }
     delete [] incomingBuffer;
@@ -258,70 +258,70 @@ void MainWindow::OnUdpRxData(){ //!< RECIBIR DATOS POR UDP
 
     for(int i=0;i<count; i++){
         switch (estadoProtocoloUdp) {
-            case START:
-                if (incomingBuffer[i]=='U'){
-                    estadoProtocoloUdp=HEADER_1;
-                    rxDataUdp.cheksum=0;
-                }
-                break;
-            case HEADER_1:
-                if (incomingBuffer[i]=='N')
-                   estadoProtocoloUdp=HEADER_2;
-                else{
-                    i--;
-                    estadoProtocoloUdp=START;
-                }
-                break;
-            case HEADER_2:
-                if (incomingBuffer[i]=='E')
-                    estadoProtocoloUdp=HEADER_3;
-                else{
-                    i--;
-                   estadoProtocoloUdp=START;
-                }
-                break;
-            case HEADER_3:
-                if (incomingBuffer[i]=='R')
-                    estadoProtocoloUdp=NBYTES;
-                else{
-                    i--;
-                   estadoProtocoloUdp=START;
-                }
-                break;
-            case NBYTES:
-                rxDataUdp.nBytes=incomingBuffer[i];
-                estadoProtocoloUdp=TOKEN;
-                break;
-            case TOKEN:
-                if (incomingBuffer[i]==':'){
-                   estadoProtocoloUdp=PAYLOAD;
-                   rxDataUdp.cheksum='U'^'N'^'E'^'R'^ rxDataUdp.nBytes^':';
-                   rxDataUdp.payLoad[0]=rxDataUdp.nBytes;
-                   rxDataUdp.index=1;
-                }
-                else{
-                    i--;
-                    estadoProtocoloUdp=START;
-                }
-                break;
-            case PAYLOAD:
-                if (rxDataUdp.nBytes>1){
-                    rxDataUdp.payLoad[rxDataUdp.index++]=incomingBuffer[i];
-                    rxDataUdp.cheksum^=incomingBuffer[i];
-                }
-                rxDataUdp.nBytes--;
-                if(rxDataUdp.nBytes==0){
-                    estadoProtocoloUdp=START;
-                    if(rxDataUdp.cheksum==incomingBuffer[i]){
-                        decodeData(&rxDataUdp.payLoad[0],UDP);
-                    }else{
-                        ui->textBrowser->append("CHECKSUM ERROR");
-                    }
-                }
-                break;
-            default:
+        case START:
+            if (incomingBuffer[i]=='U'){
+                estadoProtocoloUdp=HEADER_1;
+                rxDataUdp.cheksum=0;
+            }
+            break;
+        case HEADER_1:
+            if (incomingBuffer[i]=='N')
+                estadoProtocoloUdp=HEADER_2;
+            else{
+                i--;
                 estadoProtocoloUdp=START;
-                break;
+            }
+            break;
+        case HEADER_2:
+            if (incomingBuffer[i]=='E')
+                estadoProtocoloUdp=HEADER_3;
+            else{
+                i--;
+                estadoProtocoloUdp=START;
+            }
+            break;
+        case HEADER_3:
+            if (incomingBuffer[i]=='R')
+                estadoProtocoloUdp=NBYTES;
+            else{
+                i--;
+                estadoProtocoloUdp=START;
+            }
+            break;
+        case NBYTES:
+            rxDataUdp.nBytes=incomingBuffer[i];
+            estadoProtocoloUdp=TOKEN;
+            break;
+        case TOKEN:
+            if (incomingBuffer[i]==':'){
+                estadoProtocoloUdp=PAYLOAD;
+                rxDataUdp.cheksum='U'^'N'^'E'^'R'^ rxDataUdp.nBytes^':';
+                rxDataUdp.payLoad[0]=rxDataUdp.nBytes;
+                rxDataUdp.index=1;
+            }
+            else{
+                i--;
+                estadoProtocoloUdp=START;
+            }
+            break;
+        case PAYLOAD:
+            if (rxDataUdp.nBytes>1){
+                rxDataUdp.payLoad[rxDataUdp.index++]=incomingBuffer[i];
+                rxDataUdp.cheksum^=incomingBuffer[i];
+            }
+            rxDataUdp.nBytes--;
+            if(rxDataUdp.nBytes==0){
+                estadoProtocoloUdp=START;
+                if(rxDataUdp.cheksum==incomingBuffer[i]){
+                    decodeData(&rxDataUdp.payLoad[0],UDP);
+                }else{
+                    ui->textBrowser->append("CHECKSUM ERROR");
+                }
+            }
+            break;
+        default:
+            estadoProtocoloUdp=START;
+            break;
         }
     }
 }
@@ -341,83 +341,75 @@ void MainWindow::decodeData(uint8_t *datosRx, uint8_t source)
     }
 
     switch (datosRx[1]) {
-        case GETLOCALIP:
-            if(datosRx[4]==ACKNOWLEDGE){
-                if(source == SERIE)
-                    str = (QString("BLUEPILL (PC): GOT IP at %0:%1:%2").arg(dt.currentDateTime().time().hour(), 2, 10, QChar('0').toUpper()).arg(dt.currentDateTime().time().minute(), 2, 10, QChar('0').toUpper()).arg(dt.currentDateTime().time().second(), 2, 10, QChar('0').toUpper()));
-                else if (source == UDP)
-                    str = (QString("BLUEPILL (UDP): GOT IP at %0:%1:%2").arg(dt.currentDateTime().time().hour(), 2, 10, QChar('0').toUpper()).arg(dt.currentDateTime().time().minute(), 2, 10, QChar('0').toUpper()).arg(dt.currentDateTime().time().second(), 2, 10, QChar('0').toUpper()));
-            }else{
-                str = (QString("BLUEPILL GOT IP (NO ACKNOWLEDGE) at %0:%1:%2").arg(dt.currentDateTime().time().hour(), 2, 10, QChar('0').toUpper()).arg(dt.currentDateTime().time().minute(), 2, 10, QChar('0').toUpper()).arg(dt.currentDateTime().time().second(), 2, 10, QChar('0').toUpper()));
+    case GETLOCALIP:
+        if(datosRx[4]==ACKNOWLEDGE){
+            if(source == SERIE)
+                str = (QString("BLUEPILL (PC): GOT IP at %0:%1:%2").arg(dt.currentDateTime().time().hour(), 2, 10, QChar('0').toUpper()).arg(dt.currentDateTime().time().minute(), 2, 10, QChar('0').toUpper()).arg(dt.currentDateTime().time().second(), 2, 10, QChar('0').toUpper()));
+            else if (source == UDP)
+                str = (QString("BLUEPILL (UDP): GOT IP at %0:%1:%2").arg(dt.currentDateTime().time().hour(), 2, 10, QChar('0').toUpper()).arg(dt.currentDateTime().time().minute(), 2, 10, QChar('0').toUpper()).arg(dt.currentDateTime().time().second(), 2, 10, QChar('0').toUpper()));
+        }else{
+            str = (QString("BLUEPILL GOT IP (NO ACKNOWLEDGE) at %0:%1:%2").arg(dt.currentDateTime().time().hour(), 2, 10, QChar('0').toUpper()).arg(dt.currentDateTime().time().minute(), 2, 10, QChar('0').toUpper()).arg(dt.currentDateTime().time().second(), 2, 10, QChar('0').toUpper()));
+        }
+        ui->txtBrowserCMD->append(str);
+        break;
+    case ALIVE:
+        if(datosRx[2]==ACKNOWLEDGE){
+            if(source == SERIE)
+                str = (QString("BLUEPILL (PC): I'M ALIVE at %0:%1:%2").arg(dt.currentDateTime().time().hour(), 2, 10, QChar('0').toUpper()).arg(dt.currentDateTime().time().minute(), 2, 10, QChar('0').toUpper()).arg(dt.currentDateTime().time().second(), 2, 10, QChar('0').toUpper()));
+            else if (source == UDP){
+                str = (QString("BLUEPILL (UDP): I'M ALIVE at %0:%1:%2").arg(dt.currentDateTime().time().hour(), 2, 10, QChar('0').toUpper()).arg(dt.currentDateTime().time().minute(), 2, 10, QChar('0').toUpper()).arg(dt.currentDateTime().time().second(), 2, 10, QChar('0').toUpper()));
             }
-            ui->txtBrowserCMD->append(str);
-            break;
-        case ALIVE:
-            if(datosRx[2]==ACKNOWLEDGE){
-                if(source == SERIE)
-                    str = (QString("BLUEPILL (PC): I'M ALIVE at %0:%1:%2").arg(dt.currentDateTime().time().hour(), 2, 10, QChar('0').toUpper()).arg(dt.currentDateTime().time().minute(), 2, 10, QChar('0').toUpper()).arg(dt.currentDateTime().time().second(), 2, 10, QChar('0').toUpper()));
-                else if (source == UDP){
-                    str = (QString("BLUEPILL (UDP): I'M ALIVE at %0:%1:%2").arg(dt.currentDateTime().time().hour(), 2, 10, QChar('0').toUpper()).arg(dt.currentDateTime().time().minute(), 2, 10, QChar('0').toUpper()).arg(dt.currentDateTime().time().second(), 2, 10, QChar('0').toUpper()));
-                }
-            }else{
-                str = (QString("BLUEPILL ALIVE (NO ACKNOWLEDGE) at %0:%1:%2").arg(dt.currentDateTime().time().hour(), 2, 10, QChar('0').toUpper()).arg(dt.currentDateTime().time().minute(), 2, 10, QChar('0').toUpper()).arg(dt.currentDateTime().time().second(), 2, 10, QChar('0').toUpper()));
-            }
-            ui->AliveLabel->setStyleSheet("border: 1px solid gray;border-color: black;border-radius: 2px;background-color: green;color: white;");
-            ui->AliveLabel->setText("YES");
-            alive = true;
-            aliveTimeOut = 0;
-            ui->txtBrowserCMD->append(str);
-            break;
-        case FIRMWARE:
-            while (datosRx[i+4]) {
-                firmwareCadena[i] = datosRx[i+4];
-                i++;
-            }
-            ui->FirmwareLabel->setText(firmwareCadena);
-            break;
-        case ANALOG_IR:
-            for (uint8_t i=0; i<16; i+=2) {
-                w.u8[0] = datosRx[i+2];
-                w.u8[1] = datosRx[i+3];
-                irSensorsMeasure[i/2] = w.u16[0];
-            }
-            ui->txtBrowserCMD->append(QString("BLUEPILL (PC): NEW ANALOG IR's DATA at %0:%1:%2").arg(dt.currentDateTime().time().hour(), 2, 10, QChar('0').toUpper()).arg(dt.currentDateTime().time().minute(), 2, 10, QChar('0').toUpper()).arg(dt.currentDateTime().time().second(), 2, 10, QChar('0').toUpper()));
-            ui->ir_0->setText(QString("%1").arg(irSensorsMeasure[0], 2, 10, QChar('0')));
-            ui->ir_1->setText(QString("%1").arg(irSensorsMeasure[1], 2, 10, QChar('0')));
-            ui->ir_2->setText(QString("%1").arg(irSensorsMeasure[2], 2, 10, QChar('0')));
-            ui->ir_3->setText(QString("%1").arg(irSensorsMeasure[3], 2, 10, QChar('0')));
-            ui->ir_4->setText(QString("%1").arg(irSensorsMeasure[4], 2, 10, QChar('0')));
-            ui->ir_5->setText(QString("%1").arg(irSensorsMeasure[5], 2, 10, QChar('0')));
-            ui->ir_6->setText(QString("%1").arg(irSensorsMeasure[6], 2, 10, QChar('0')));
-            ui->ir_7->setText(QString("%1").arg(irSensorsMeasure[7], 2, 10, QChar('0')));
-            break;
-        case MPU_6050:
-            for (uint8_t i=0; i<12; i+=2) {
-                w.i32 = 0;
-                w.u8[0] = datosRx[i+2];
-                w.u8[1] = datosRx[i+3];
-                myMPUdata[i/2] = ((int16_t)w.i32);///16384.0;
-                //myMPUdata[i/2] = w.f;//((int16_t)w.u32)*16384.0;
-            }
-            ui->txtBrowserCMD->append(QString("BLUEPILL (PC): NEW MPU6050 DATA at %0:%1:%2").arg(dt.currentDateTime().time().hour(), 2, 10, QChar('0').toUpper()).arg(dt.currentDateTime().time().minute(), 2, 10, QChar('0').toUpper()).arg(dt.currentDateTime().time().second(), 2, 10, QChar('0').toUpper()));
-            ui->txtBrowserCMD->append(QString("Ax = %0 \n").arg(myMPUdata[0]/16384.0, 1, 'f', 3));
-            ui->txtBrowserCMD->append(QString("Ay = %0 \n").arg(myMPUdata[1]/16384.0, 1, 'f', 3));
-            ui->txtBrowserCMD->append(QString("Az = %0 \n").arg(myMPUdata[2]/16384.0, 1, 'f', 3));
-            ui->txtBrowserCMD->append(QString("Gx = %0 \n").arg(myMPUdata[3]/131.0, 1, 'f', 3));
-            ui->txtBrowserCMD->append(QString("Gy = %0 \n").arg(myMPUdata[4]/131.0, 1, 'f', 3));
-            ui->txtBrowserCMD->append(QString("Gz = %0 \n").arg(myMPUdata[5]/131.0, 1, 'f', 3));
+        }else{
+            str = (QString("BLUEPILL ALIVE (NO ACKNOWLEDGE) at %0:%1:%2").arg(dt.currentDateTime().time().hour(), 2, 10, QChar('0').toUpper()).arg(dt.currentDateTime().time().minute(), 2, 10, QChar('0').toUpper()).arg(dt.currentDateTime().time().second(), 2, 10, QChar('0').toUpper()));
+        }
+        ui->AliveLabel->setStyleSheet("border: 1px solid gray;border-color: black;border-radius: 2px;background-color: green;color: white;");
+        ui->AliveLabel->setText("YES");
+        alive = true;
+        aliveTimeOut = 0;
+        ui->txtBrowserCMD->append(str);
+        break;
+    case FIRMWARE:
+        while (datosRx[i+4]) {
+            firmwareCadena[i] = datosRx[i+4];
+            i++;
+        }
+        ui->FirmwareLabel->setText(firmwareCadena);
+        break;
+    case ANALOG_IR:
+        for (uint8_t i=0; i<16; i+=2) {
+            w.u8[0] = datosRx[i+2];
+            w.u8[1] = datosRx[i+3];
+            irSensorsMeasure[i/2] = w.u16[0];
+        }
+        ui->txtBrowserCMD->append(QString("BLUEPILL (PC): NEW ANALOG IR's DATA at %0:%1:%2").arg(dt.currentDateTime().time().hour(), 2, 10, QChar('0').toUpper()).arg(dt.currentDateTime().time().minute(), 2, 10, QChar('0').toUpper()).arg(dt.currentDateTime().time().second(), 2, 10, QChar('0').toUpper()));
+        ui->ir_0->setText(QString("%1").arg(irSensorsMeasure[0], 2, 10, QChar('0')));
+        ui->ir_1->setText(QString("%1").arg(irSensorsMeasure[1], 2, 10, QChar('0')));
+        ui->ir_2->setText(QString("%1").arg(irSensorsMeasure[2], 2, 10, QChar('0')));
+        ui->ir_3->setText(QString("%1").arg(irSensorsMeasure[3], 2, 10, QChar('0')));
+        ui->ir_4->setText(QString("%1").arg(irSensorsMeasure[4], 2, 10, QChar('0')));
+        ui->ir_5->setText(QString("%1").arg(irSensorsMeasure[5], 2, 10, QChar('0')));
+        ui->ir_6->setText(QString("%1").arg(irSensorsMeasure[6], 2, 10, QChar('0')));
+        ui->ir_7->setText(QString("%1").arg(irSensorsMeasure[7], 2, 10, QChar('0')));
+        break;
+    case MPU_6050:
+        for (uint8_t i=0; i<12; i+=2) {
+            w.i32 = 0;
+            w.u8[0] = datosRx[i+2];
+            w.u8[1] = datosRx[i+3];
+            myMPUdata[i/2] = ((int16_t)w.i32);
+        }
+        ui->txtBrowserCMD->append(QString("BLUEPILL (PC): NEW MPU6050 DATA at %0:%1:%2").arg(dt.currentDateTime().time().hour(), 2, 10, QChar('0').toUpper()).arg(dt.currentDateTime().time().minute(), 2, 10, QChar('0').toUpper()).arg(dt.currentDateTime().time().second(), 2, 10, QChar('0').toUpper()));
+        ui->ACCx->setText(QString("%1").arg(myMPUdata[0]/16384.0, 1, 'f', 3));
+        ui->ACCy->setText(QString("%1").arg(myMPUdata[1]/16384.0, 1, 'f', 3));
+        ui->ACCz->setText(QString("%1").arg(myMPUdata[2]/16384.0, 1, 'f', 3));
+        ui->GYRx->setText(QString("%1").arg(myMPUdata[3]/131.0, 1, 'f', 3));
+        ui->GYRy->setText(QString("%1").arg(myMPUdata[4]/131.0, 1, 'f', 3));
+        ui->GYRz->setText(QString("%1").arg(myMPUdata[5]/131.0, 1, 'f', 3));
 
-            ui->ACCx->setText(QString("%1").arg(myMPUdata[0]/16384.0, 1, 'f', 3));
-            ui->ACCy->setText(QString("%1").arg(myMPUdata[1]/16384.0, 1, 'f', 3));
-            ui->ACCz->setText(QString("%1").arg(myMPUdata[2]/16384.0, 1, 'f', 3));
-            ui->GYRx->setText(QString("%1").arg(myMPUdata[3]/131.0, 1, 'f', 3));
-            ui->GYRy->setText(QString("%1").arg(myMPUdata[4]/131.0, 1, 'f', 3));
-            ui->GYRz->setText(QString("%1").arg(myMPUdata[5]/131.0, 1, 'f', 3));
-
-            break;
-        default:
-            str = (QString("BLUEPILL: UNKNOWN COMMAND at %0:%1:%2").arg(dt.currentDateTime().time().hour(), 2, 10, QChar('0').toUpper()).arg(dt.currentDateTime().time().minute(), 2, 10, QChar('0').toUpper()).arg(dt.currentDateTime().time().second(), 2, 10, QChar('0').toUpper()));
-            ui->txtBrowserCMD->append(str);
+        break;
+    default:
+        str = (QString("BLUEPILL: UNKNOWN COMMAND at %0:%1:%2").arg(dt.currentDateTime().time().hour(), 2, 10, QChar('0').toUpper()).arg(dt.currentDateTime().time().minute(), 2, 10, QChar('0').toUpper()).arg(dt.currentDateTime().time().second(), 2, 10, QChar('0').toUpper()));
+        ui->txtBrowserCMD->append(str);
     }
 }
 
@@ -441,15 +433,15 @@ void MainWindow::sendDataSerial()
         cmdId = ui->comboBoxCom->currentData().toInt();
 
     switch (cmdId) {
-        case ALIVE:
-        case FIRMWARE:
-        case ANALOG_IR:
-        case MPU_6050:
-            dato[indice++] = cmdId;
-            dato[NBYTES] = 0x02;
-            break;
-        default:
-            return;
+    case ALIVE:
+    case FIRMWARE:
+    case ANALOG_IR:
+    case MPU_6050:
+        dato[indice++] = cmdId;
+        dato[NBYTES] = 0x02;
+        break;
+    default:
+        return;
     }
 
     isASelectedCmd = false;
@@ -485,15 +477,15 @@ void MainWindow::sendDataUDP()
         cmdId = ui->comboBoxCom->currentData().toInt();
 
     switch (cmdId) {
-        case ALIVE:
-        case FIRMWARE:
-        case ANALOG_IR:
-        case MPU_6050:
-            dato[indice++] = cmdId;
-            dato[NBYTES] = 0x02;
-            break;
-        default:
-            return;
+    case ALIVE:
+    case FIRMWARE:
+    case ANALOG_IR:
+    case MPU_6050:
+        dato[indice++] = cmdId;
+        dato[NBYTES] = 0x02;
+        break;
+    default:
+        return;
     }
 
     isASelectedCmd = false;

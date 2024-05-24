@@ -1,6 +1,5 @@
 #ifndef MAINWINDOW_H
 #define MAINWINDOW_H
-#include "qlcdnumber.h"
 #define NUMSWITCHES                 1
 #define SERIALCONNECTION            1
 #define UDPCONNECTION               2
@@ -78,7 +77,7 @@ private:
     QHostAddress RemoteAddress;
     quint16 RemotePort;
     QHostAddress clientAddress;
-    QDateTime       dt;
+    QDateTime dt;
     int puertoremoto;
 
     typedef enum{
@@ -142,8 +141,7 @@ private:
     uint16_t irSensorsMeasure[8];
 
     /******MPU6050*******/
-    //int16_t myMPUdata[6];
-    float myMPUdata[6];
+    int16_t myMPUdata[6];
 
     /*TIMER*/
     QTimer *QTimer1;
