@@ -67,6 +67,8 @@ private slots:
     void on_clearButton_clicked();
 
     void cleanDataInfo();
+
+    int16_t integrate(uint16_t newValue, int16_t lastValue, uint8_t condition, uint8_t timeInterval);
 private:
 
     Ui::MainWindow *ui;
@@ -101,6 +103,9 @@ private:
         FIRMWARE = 0xF1,
         ANALOG_IR = 0xF2,
         MPU_6050 = 0xF3,
+        DISPLAY_SSD1306 = 0xF4,
+        MOTORES_N20 = 0xF5,
+        TEST_MOTORES = 0xF6,
         UNKNOWNCOMMAND = 0xFF
     }_eCmd;
 
@@ -137,17 +142,36 @@ private:
         int8_t  i8[4];
     }_udat;
 
+    typedef struct{
+        double Ax;
+        double Ay;
+        double Az;
+        double Vx;
+        double Vy;
+        double Vz;
+        double Px;
+        double Py;
+        double Pz;
+        uint8_t dt;
+    }_sMPU;
+
     /******TCRT5000******/
-    uint16_t irSensorsMeasure[8];
+    uint8_t dataIR[8];
 
     /******MPU6050*******/
     int16_t myMPUdata[6];
+    _sMPU myMPU;
 
     /*TIMER*/
     QTimer *QTimer1;
-    uint8_t timeLecturaSensoresTask10ms = 0;
+    uint8_t timeADCdata = 0;
     uint8_t timeMPUdata = 0;
+    uint16_t timeDISPLAYdata = 0;
     uint16_t aliveTimeOut = 0;
+
+    /*MOTORES*/
+    int8_t powerMotorLEFT = 0;
+    int8_t powerMotorRIGHT = 0;
 
     /*RADAR*/
     bool radarDrawing = false;
@@ -163,6 +187,5 @@ private:
     uint8_t connectionType = 0;
     bool alive = false;
     char firmwareCadena[30];
-
 };
 #endif // MAINWINDOW_H

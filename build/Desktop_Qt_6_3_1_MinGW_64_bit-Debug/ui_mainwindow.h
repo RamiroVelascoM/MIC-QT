@@ -22,6 +22,7 @@
 #include <QtWidgets/QMainWindow>
 #include <QtWidgets/QMenu>
 #include <QtWidgets/QMenuBar>
+#include <QtWidgets/QProgressBar>
 #include <QtWidgets/QPushButton>
 #include <QtWidgets/QStatusBar>
 #include <QtWidgets/QTextBrowser>
@@ -59,8 +60,6 @@ public:
     QPushButton *pushButtonSend;
     QPushButton *pushButtonSend_2;
     QComboBox *comboBoxCom;
-    QGroupBox *DATACOMMANDS;
-    QTextBrowser *txtBrowserCMD;
     QGroupBox *CARSENSORS;
     QGroupBox *ANALOG;
     QLabel *irLabel_5;
@@ -88,21 +87,37 @@ public:
     QPushButton *clearButton;
     QGroupBox *groupBox_15;
     QLabel *EstadoBotonLabel;
-    QWidget *widgetRadar;
+    QWidget *positionRadar;
     QGroupBox *MPU6050;
-    QGroupBox *DATA;
-    QLabel *GXLabel;
-    QLabel *GYLabel;
-    QLabel *GZLabel;
+    QGroupBox *ACCELERATION;
     QLabel *AYLabel;
     QLabel *AXLabel;
     QLabel *AZLabel;
-    QLineEdit *ACCy;
-    QLineEdit *ACCz;
-    QLineEdit *GYRx;
-    QLineEdit *GYRy;
-    QLineEdit *GYRz;
-    QLineEdit *ACCx;
+    QLineEdit *AY_Data;
+    QLineEdit *AZ_Data;
+    QLineEdit *AX_Data;
+    QGroupBox *VELOCITY;
+    QLabel *VYLabel;
+    QLabel *VXLabel;
+    QLabel *VZLabel;
+    QLineEdit *VY_Data;
+    QLineEdit *VZ_Data;
+    QLineEdit *VX_Data;
+    QGroupBox *POSITION;
+    QLabel *PYLabel;
+    QLabel *PXLabel;
+    QLabel *PZLabel;
+    QLineEdit *PY_Data;
+    QLineEdit *PZ_Data;
+    QLineEdit *PX_Data;
+    QGroupBox *MOTORS;
+    QGroupBox *DATA_2;
+    QLabel *LM_Label;
+    QLabel *RM_Label;
+    QProgressBar *LMPOW_POS;
+    QProgressBar *RMPOW_POS;
+    QProgressBar *LMPOW_NEG;
+    QProgressBar *RMPOW_NEG;
     QMenuBar *menubar;
     QMenu *menuConfiguraciones;
     QStatusBar *statusbar;
@@ -135,7 +150,7 @@ public:
         centralwidget->setObjectName(QString::fromUtf8("centralwidget"));
         DATAFLOW = new QGroupBox(centralwidget);
         DATAFLOW->setObjectName(QString::fromUtf8("DATAFLOW"));
-        DATAFLOW->setGeometry(QRect(440, 380, 401, 331));
+        DATAFLOW->setGeometry(QRect(440, 10, 401, 501));
         QFont font1;
         font1.setFamilies({QString::fromUtf8("Rubik")});
         font1.setPointSize(12);
@@ -154,13 +169,15 @@ public:
         DATAFLOW->setCheckable(false);
         textBrowser = new QTextBrowser(DATAFLOW);
         textBrowser->setObjectName(QString::fromUtf8("textBrowser"));
-        textBrowser->setGeometry(QRect(10, 30, 381, 291));
+        textBrowser->setGeometry(QRect(10, 30, 381, 461));
         textBrowser->setStyleSheet(QString::fromUtf8("border: 1px solid gray;\n"
 "border-color: black;\n"
 "border-radius: 2px;\n"
 "background-color: rgb(0, 0, 100);\n"
 "color: rgb(255, 255, 255);\n"
 "font: 9pt \"Rubik\";"));
+        textBrowser->setVerticalScrollBarPolicy(Qt::ScrollBarAlwaysOff);
+        textBrowser->setHorizontalScrollBarPolicy(Qt::ScrollBarAlwaysOff);
         COMMUNICATIONS = new QGroupBox(centralwidget);
         COMMUNICATIONS->setObjectName(QString::fromUtf8("COMMUNICATIONS"));
         COMMUNICATIONS->setGeometry(QRect(20, 10, 411, 361));
@@ -364,29 +381,6 @@ public:
 
         gridLayout_2->addWidget(comboBoxCom, 0, 0, 1, 2);
 
-        DATACOMMANDS = new QGroupBox(centralwidget);
-        DATACOMMANDS->setObjectName(QString::fromUtf8("DATACOMMANDS"));
-        DATACOMMANDS->setGeometry(QRect(440, 10, 401, 361));
-        DATACOMMANDS->setFont(font1);
-        DATACOMMANDS->setStyleSheet(QString::fromUtf8("QGroupBox {\n"
-"    border: 1px solid gray;\n"
-"    border-color: blue;\n"
-"    border-radius: 5px;\n"
-"	background-color: rgb(0, 0, 255);\n"
-"	font: 700 12pt \"Rubik\";\n"
-"	color: rgb(255, 255, 255);\n"
-"}"));
-        DATACOMMANDS->setAlignment(Qt::AlignCenter);
-        DATACOMMANDS->setCheckable(false);
-        txtBrowserCMD = new QTextBrowser(DATACOMMANDS);
-        txtBrowserCMD->setObjectName(QString::fromUtf8("txtBrowserCMD"));
-        txtBrowserCMD->setGeometry(QRect(10, 30, 381, 321));
-        txtBrowserCMD->setStyleSheet(QString::fromUtf8("border: 1px solid gray;\n"
-"border-color: black;\n"
-"border-radius: 2px;\n"
-"background-color: rgb(0, 0, 100);\n"
-"color: rgb(255, 255, 255);\n"
-"font: 9pt \"Rubik\";"));
         CARSENSORS = new QGroupBox(centralwidget);
         CARSENSORS->setObjectName(QString::fromUtf8("CARSENSORS"));
         CARSENSORS->setGeometry(QRect(850, 10, 431, 211));
@@ -745,13 +739,13 @@ public:
         EstadoBotonLabel->setFrameShadow(QFrame::Plain);
         EstadoBotonLabel->setLineWidth(1);
         EstadoBotonLabel->setAlignment(Qt::AlignCenter);
-        widgetRadar = new QWidget(centralwidget);
-        widgetRadar->setObjectName(QString::fromUtf8("widgetRadar"));
-        widgetRadar->setGeometry(QRect(20, 380, 411, 331));
-        widgetRadar->setStyleSheet(QString::fromUtf8("background-color: rgb(0, 0, 0);"));
+        positionRadar = new QWidget(centralwidget);
+        positionRadar->setObjectName(QString::fromUtf8("positionRadar"));
+        positionRadar->setGeometry(QRect(20, 380, 411, 331));
+        positionRadar->setStyleSheet(QString::fromUtf8("background-color: rgb(0, 0, 100);"));
         MPU6050 = new QGroupBox(centralwidget);
         MPU6050->setObjectName(QString::fromUtf8("MPU6050"));
-        MPU6050->setGeometry(QRect(850, 380, 431, 211));
+        MPU6050->setGeometry(QRect(850, 380, 431, 331));
         MPU6050->setFont(font1);
         MPU6050->setStyleSheet(QString::fromUtf8("QGroupBox {\n"
 "    border: 1px solid gray;\n"
@@ -763,61 +757,17 @@ public:
 "}"));
         MPU6050->setAlignment(Qt::AlignCenter);
         MPU6050->setFlat(false);
-        DATA = new QGroupBox(MPU6050);
-        DATA->setObjectName(QString::fromUtf8("DATA"));
-        DATA->setGeometry(QRect(10, 30, 411, 171));
-        DATA->setFont(font1);
-        DATA->setStyleSheet(QString::fromUtf8("background-color: rgb(0, 0, 0);\n"
+        ACCELERATION = new QGroupBox(MPU6050);
+        ACCELERATION->setObjectName(QString::fromUtf8("ACCELERATION"));
+        ACCELERATION->setGeometry(QRect(10, 30, 411, 91));
+        ACCELERATION->setFont(font1);
+        ACCELERATION->setStyleSheet(QString::fromUtf8("background-color: rgb(0, 0, 0);\n"
 "color: rgb(255, 255, 255);\n"
 "font: 700 12pt \"Rubik\";"));
-        DATA->setAlignment(Qt::AlignCenter);
-        GXLabel = new QLabel(DATA);
-        GXLabel->setObjectName(QString::fromUtf8("GXLabel"));
-        GXLabel->setGeometry(QRect(10, 100, 121, 21));
-        sizePolicy.setHeightForWidth(GXLabel->sizePolicy().hasHeightForWidth());
-        GXLabel->setSizePolicy(sizePolicy);
-        GXLabel->setFont(font1);
-        GXLabel->setLayoutDirection(Qt::LeftToRight);
-        GXLabel->setStyleSheet(QString::fromUtf8("border: 1px solid gray;\n"
-"border-color: black;\n"
-"border-radius: 2px;"));
-        GXLabel->setFrameShape(QFrame::Box);
-        GXLabel->setLineWidth(1);
-        GXLabel->setTextFormat(Qt::AutoText);
-        GXLabel->setAlignment(Qt::AlignCenter);
-        GYLabel = new QLabel(DATA);
-        GYLabel->setObjectName(QString::fromUtf8("GYLabel"));
-        GYLabel->setGeometry(QRect(150, 100, 111, 21));
-        sizePolicy.setHeightForWidth(GYLabel->sizePolicy().hasHeightForWidth());
-        GYLabel->setSizePolicy(sizePolicy);
-        GYLabel->setFont(font1);
-        GYLabel->setLayoutDirection(Qt::LeftToRight);
-        GYLabel->setStyleSheet(QString::fromUtf8("border: 1px solid gray;\n"
-"border-color: black;\n"
-"border-radius: 2px;"));
-        GYLabel->setFrameShape(QFrame::Box);
-        GYLabel->setLineWidth(1);
-        GYLabel->setTextFormat(Qt::AutoText);
-        GYLabel->setAlignment(Qt::AlignCenter);
-        GZLabel = new QLabel(DATA);
-        GZLabel->setObjectName(QString::fromUtf8("GZLabel"));
-        GZLabel->setGeometry(QRect(280, 100, 121, 21));
-        sizePolicy.setHeightForWidth(GZLabel->sizePolicy().hasHeightForWidth());
-        GZLabel->setSizePolicy(sizePolicy);
-        GZLabel->setFont(font1);
-        GZLabel->setLayoutDirection(Qt::LeftToRight);
-        GZLabel->setStyleSheet(QString::fromUtf8("border: 1px solid gray;\n"
-"border-color: black;\n"
-"border-radius: 2px;"));
-        GZLabel->setFrameShape(QFrame::Box);
-        GZLabel->setFrameShadow(QFrame::Plain);
-        GZLabel->setLineWidth(1);
-        GZLabel->setTextFormat(Qt::AutoText);
-        GZLabel->setAlignment(Qt::AlignCenter);
-        GZLabel->setWordWrap(false);
-        AYLabel = new QLabel(DATA);
+        ACCELERATION->setAlignment(Qt::AlignCenter);
+        AYLabel = new QLabel(ACCELERATION);
         AYLabel->setObjectName(QString::fromUtf8("AYLabel"));
-        AYLabel->setGeometry(QRect(150, 30, 111, 21));
+        AYLabel->setGeometry(QRect(150, 10, 111, 21));
         sizePolicy.setHeightForWidth(AYLabel->sizePolicy().hasHeightForWidth());
         AYLabel->setSizePolicy(sizePolicy);
         AYLabel->setFont(font1);
@@ -829,9 +779,9 @@ public:
         AYLabel->setLineWidth(1);
         AYLabel->setTextFormat(Qt::AutoText);
         AYLabel->setAlignment(Qt::AlignCenter);
-        AXLabel = new QLabel(DATA);
+        AXLabel = new QLabel(ACCELERATION);
         AXLabel->setObjectName(QString::fromUtf8("AXLabel"));
-        AXLabel->setGeometry(QRect(11, 31, 121, 21));
+        AXLabel->setGeometry(QRect(11, 11, 121, 21));
         sizePolicy.setHeightForWidth(AXLabel->sizePolicy().hasHeightForWidth());
         AXLabel->setSizePolicy(sizePolicy);
         AXLabel->setFont(font1);
@@ -845,9 +795,9 @@ public:
         AXLabel->setTextFormat(Qt::AutoText);
         AXLabel->setAlignment(Qt::AlignCenter);
         AXLabel->setWordWrap(false);
-        AZLabel = new QLabel(DATA);
+        AZLabel = new QLabel(ACCELERATION);
         AZLabel->setObjectName(QString::fromUtf8("AZLabel"));
-        AZLabel->setGeometry(QRect(280, 30, 121, 21));
+        AZLabel->setGeometry(QRect(280, 10, 121, 21));
         sizePolicy.setHeightForWidth(AZLabel->sizePolicy().hasHeightForWidth());
         AZLabel->setSizePolicy(sizePolicy);
         AZLabel->setFont(font1);
@@ -859,84 +809,323 @@ public:
         AZLabel->setLineWidth(1);
         AZLabel->setTextFormat(Qt::AutoText);
         AZLabel->setAlignment(Qt::AlignCenter);
-        ACCy = new QLineEdit(DATA);
-        ACCy->setObjectName(QString::fromUtf8("ACCy"));
-        ACCy->setGeometry(QRect(150, 50, 111, 41));
-        sizePolicy1.setHeightForWidth(ACCy->sizePolicy().hasHeightForWidth());
-        ACCy->setSizePolicy(sizePolicy1);
-        ACCy->setStyleSheet(QString::fromUtf8("border: 1px solid gray;\n"
+        AY_Data = new QLineEdit(ACCELERATION);
+        AY_Data->setObjectName(QString::fromUtf8("AY_Data"));
+        AY_Data->setGeometry(QRect(150, 40, 111, 41));
+        sizePolicy1.setHeightForWidth(AY_Data->sizePolicy().hasHeightForWidth());
+        AY_Data->setSizePolicy(sizePolicy1);
+        AY_Data->setStyleSheet(QString::fromUtf8("border: 1px solid gray;\n"
 "border-color: black;\n"
 "border-radius: 2px;\n"
 "background-color: rgb(0, 0, 100);\n"
 "color: rgb(255, 255, 255);\n"
 "font: 12pt \"Rubik\";"));
-        ACCy->setAlignment(Qt::AlignCenter);
-        ACCy->setReadOnly(true);
-        ACCz = new QLineEdit(DATA);
-        ACCz->setObjectName(QString::fromUtf8("ACCz"));
-        ACCz->setGeometry(QRect(280, 50, 121, 41));
-        sizePolicy1.setHeightForWidth(ACCz->sizePolicy().hasHeightForWidth());
-        ACCz->setSizePolicy(sizePolicy1);
-        ACCz->setStyleSheet(QString::fromUtf8("border: 1px solid gray;\n"
+        AY_Data->setAlignment(Qt::AlignCenter);
+        AY_Data->setReadOnly(true);
+        AZ_Data = new QLineEdit(ACCELERATION);
+        AZ_Data->setObjectName(QString::fromUtf8("AZ_Data"));
+        AZ_Data->setGeometry(QRect(280, 40, 121, 41));
+        sizePolicy1.setHeightForWidth(AZ_Data->sizePolicy().hasHeightForWidth());
+        AZ_Data->setSizePolicy(sizePolicy1);
+        AZ_Data->setStyleSheet(QString::fromUtf8("border: 1px solid gray;\n"
 "border-color: black;\n"
 "border-radius: 2px;\n"
 "background-color: rgb(0, 0, 100);\n"
 "color: rgb(255, 255, 255);\n"
 "font: 12pt \"Rubik\";"));
-        ACCz->setAlignment(Qt::AlignCenter);
-        ACCz->setReadOnly(true);
-        GYRx = new QLineEdit(DATA);
-        GYRx->setObjectName(QString::fromUtf8("GYRx"));
-        GYRx->setGeometry(QRect(10, 120, 121, 41));
-        sizePolicy1.setHeightForWidth(GYRx->sizePolicy().hasHeightForWidth());
-        GYRx->setSizePolicy(sizePolicy1);
-        GYRx->setStyleSheet(QString::fromUtf8("border: 1px solid gray;\n"
+        AZ_Data->setAlignment(Qt::AlignCenter);
+        AZ_Data->setReadOnly(true);
+        AX_Data = new QLineEdit(ACCELERATION);
+        AX_Data->setObjectName(QString::fromUtf8("AX_Data"));
+        AX_Data->setGeometry(QRect(10, 40, 121, 41));
+        sizePolicy1.setHeightForWidth(AX_Data->sizePolicy().hasHeightForWidth());
+        AX_Data->setSizePolicy(sizePolicy1);
+        AX_Data->setStyleSheet(QString::fromUtf8("border: 1px solid gray;\n"
 "border-color: black;\n"
 "border-radius: 2px;\n"
 "background-color: rgb(0, 0, 100);\n"
 "color: rgb(255, 255, 255);\n"
 "font: 12pt \"Rubik\";"));
-        GYRx->setAlignment(Qt::AlignCenter);
-        GYRx->setReadOnly(true);
-        GYRy = new QLineEdit(DATA);
-        GYRy->setObjectName(QString::fromUtf8("GYRy"));
-        GYRy->setGeometry(QRect(150, 120, 111, 41));
-        sizePolicy1.setHeightForWidth(GYRy->sizePolicy().hasHeightForWidth());
-        GYRy->setSizePolicy(sizePolicy1);
-        GYRy->setStyleSheet(QString::fromUtf8("border: 1px solid gray;\n"
+        AX_Data->setAlignment(Qt::AlignCenter);
+        AX_Data->setReadOnly(true);
+        VELOCITY = new QGroupBox(MPU6050);
+        VELOCITY->setObjectName(QString::fromUtf8("VELOCITY"));
+        VELOCITY->setGeometry(QRect(10, 130, 411, 91));
+        VELOCITY->setFont(font1);
+        VELOCITY->setStyleSheet(QString::fromUtf8("background-color: rgb(0, 0, 0);\n"
+"color: rgb(255, 255, 255);\n"
+"font: 700 12pt \"Rubik\";"));
+        VELOCITY->setAlignment(Qt::AlignCenter);
+        VYLabel = new QLabel(VELOCITY);
+        VYLabel->setObjectName(QString::fromUtf8("VYLabel"));
+        VYLabel->setGeometry(QRect(150, 10, 111, 21));
+        sizePolicy.setHeightForWidth(VYLabel->sizePolicy().hasHeightForWidth());
+        VYLabel->setSizePolicy(sizePolicy);
+        VYLabel->setFont(font1);
+        VYLabel->setLayoutDirection(Qt::LeftToRight);
+        VYLabel->setStyleSheet(QString::fromUtf8("border: 1px solid gray;\n"
+"border-color: black;\n"
+"border-radius: 2px;"));
+        VYLabel->setFrameShape(QFrame::Box);
+        VYLabel->setLineWidth(1);
+        VYLabel->setTextFormat(Qt::AutoText);
+        VYLabel->setAlignment(Qt::AlignCenter);
+        VXLabel = new QLabel(VELOCITY);
+        VXLabel->setObjectName(QString::fromUtf8("VXLabel"));
+        VXLabel->setGeometry(QRect(11, 11, 121, 21));
+        sizePolicy.setHeightForWidth(VXLabel->sizePolicy().hasHeightForWidth());
+        VXLabel->setSizePolicy(sizePolicy);
+        VXLabel->setFont(font1);
+        VXLabel->setLayoutDirection(Qt::LeftToRight);
+        VXLabel->setStyleSheet(QString::fromUtf8("border: 1px solid gray;\n"
+"border-color: black;\n"
+"border-radius: 2px;"));
+        VXLabel->setFrameShape(QFrame::Box);
+        VXLabel->setFrameShadow(QFrame::Plain);
+        VXLabel->setLineWidth(1);
+        VXLabel->setTextFormat(Qt::AutoText);
+        VXLabel->setAlignment(Qt::AlignCenter);
+        VXLabel->setWordWrap(false);
+        VZLabel = new QLabel(VELOCITY);
+        VZLabel->setObjectName(QString::fromUtf8("VZLabel"));
+        VZLabel->setGeometry(QRect(280, 10, 121, 21));
+        sizePolicy.setHeightForWidth(VZLabel->sizePolicy().hasHeightForWidth());
+        VZLabel->setSizePolicy(sizePolicy);
+        VZLabel->setFont(font1);
+        VZLabel->setLayoutDirection(Qt::LeftToRight);
+        VZLabel->setStyleSheet(QString::fromUtf8("border: 1px solid gray;\n"
+"border-color: black;\n"
+"border-radius: 2px;"));
+        VZLabel->setFrameShape(QFrame::Box);
+        VZLabel->setLineWidth(1);
+        VZLabel->setTextFormat(Qt::AutoText);
+        VZLabel->setAlignment(Qt::AlignCenter);
+        VY_Data = new QLineEdit(VELOCITY);
+        VY_Data->setObjectName(QString::fromUtf8("VY_Data"));
+        VY_Data->setGeometry(QRect(150, 40, 111, 41));
+        sizePolicy1.setHeightForWidth(VY_Data->sizePolicy().hasHeightForWidth());
+        VY_Data->setSizePolicy(sizePolicy1);
+        VY_Data->setStyleSheet(QString::fromUtf8("border: 1px solid gray;\n"
 "border-color: black;\n"
 "border-radius: 2px;\n"
 "background-color: rgb(0, 0, 100);\n"
 "color: rgb(255, 255, 255);\n"
 "font: 12pt \"Rubik\";"));
-        GYRy->setAlignment(Qt::AlignCenter);
-        GYRy->setReadOnly(true);
-        GYRz = new QLineEdit(DATA);
-        GYRz->setObjectName(QString::fromUtf8("GYRz"));
-        GYRz->setGeometry(QRect(280, 120, 121, 41));
-        sizePolicy1.setHeightForWidth(GYRz->sizePolicy().hasHeightForWidth());
-        GYRz->setSizePolicy(sizePolicy1);
-        GYRz->setStyleSheet(QString::fromUtf8("border: 1px solid gray;\n"
+        VY_Data->setAlignment(Qt::AlignCenter);
+        VY_Data->setReadOnly(true);
+        VZ_Data = new QLineEdit(VELOCITY);
+        VZ_Data->setObjectName(QString::fromUtf8("VZ_Data"));
+        VZ_Data->setGeometry(QRect(280, 40, 121, 41));
+        sizePolicy1.setHeightForWidth(VZ_Data->sizePolicy().hasHeightForWidth());
+        VZ_Data->setSizePolicy(sizePolicy1);
+        VZ_Data->setStyleSheet(QString::fromUtf8("border: 1px solid gray;\n"
 "border-color: black;\n"
 "border-radius: 2px;\n"
 "background-color: rgb(0, 0, 100);\n"
 "color: rgb(255, 255, 255);\n"
 "font: 12pt \"Rubik\";"));
-        GYRz->setAlignment(Qt::AlignCenter);
-        GYRz->setReadOnly(true);
-        ACCx = new QLineEdit(DATA);
-        ACCx->setObjectName(QString::fromUtf8("ACCx"));
-        ACCx->setGeometry(QRect(10, 50, 121, 41));
-        sizePolicy1.setHeightForWidth(ACCx->sizePolicy().hasHeightForWidth());
-        ACCx->setSizePolicy(sizePolicy1);
-        ACCx->setStyleSheet(QString::fromUtf8("border: 1px solid gray;\n"
+        VZ_Data->setAlignment(Qt::AlignCenter);
+        VZ_Data->setReadOnly(true);
+        VX_Data = new QLineEdit(VELOCITY);
+        VX_Data->setObjectName(QString::fromUtf8("VX_Data"));
+        VX_Data->setGeometry(QRect(10, 40, 121, 41));
+        sizePolicy1.setHeightForWidth(VX_Data->sizePolicy().hasHeightForWidth());
+        VX_Data->setSizePolicy(sizePolicy1);
+        VX_Data->setStyleSheet(QString::fromUtf8("border: 1px solid gray;\n"
 "border-color: black;\n"
 "border-radius: 2px;\n"
 "background-color: rgb(0, 0, 100);\n"
 "color: rgb(255, 255, 255);\n"
 "font: 12pt \"Rubik\";"));
-        ACCx->setAlignment(Qt::AlignCenter);
-        ACCx->setReadOnly(true);
+        VX_Data->setAlignment(Qt::AlignCenter);
+        VX_Data->setReadOnly(true);
+        POSITION = new QGroupBox(MPU6050);
+        POSITION->setObjectName(QString::fromUtf8("POSITION"));
+        POSITION->setGeometry(QRect(10, 230, 411, 91));
+        POSITION->setFont(font1);
+        POSITION->setStyleSheet(QString::fromUtf8("background-color: rgb(0, 0, 0);\n"
+"color: rgb(255, 255, 255);\n"
+"font: 700 12pt \"Rubik\";"));
+        POSITION->setAlignment(Qt::AlignCenter);
+        PYLabel = new QLabel(POSITION);
+        PYLabel->setObjectName(QString::fromUtf8("PYLabel"));
+        PYLabel->setGeometry(QRect(150, 10, 111, 21));
+        sizePolicy.setHeightForWidth(PYLabel->sizePolicy().hasHeightForWidth());
+        PYLabel->setSizePolicy(sizePolicy);
+        PYLabel->setFont(font1);
+        PYLabel->setLayoutDirection(Qt::LeftToRight);
+        PYLabel->setStyleSheet(QString::fromUtf8("border: 1px solid gray;\n"
+"border-color: black;\n"
+"border-radius: 2px;"));
+        PYLabel->setFrameShape(QFrame::Box);
+        PYLabel->setLineWidth(1);
+        PYLabel->setTextFormat(Qt::AutoText);
+        PYLabel->setAlignment(Qt::AlignCenter);
+        PXLabel = new QLabel(POSITION);
+        PXLabel->setObjectName(QString::fromUtf8("PXLabel"));
+        PXLabel->setGeometry(QRect(11, 11, 121, 21));
+        sizePolicy.setHeightForWidth(PXLabel->sizePolicy().hasHeightForWidth());
+        PXLabel->setSizePolicy(sizePolicy);
+        PXLabel->setFont(font1);
+        PXLabel->setLayoutDirection(Qt::LeftToRight);
+        PXLabel->setStyleSheet(QString::fromUtf8("border: 1px solid gray;\n"
+"border-color: black;\n"
+"border-radius: 2px;"));
+        PXLabel->setFrameShape(QFrame::Box);
+        PXLabel->setFrameShadow(QFrame::Plain);
+        PXLabel->setLineWidth(1);
+        PXLabel->setTextFormat(Qt::AutoText);
+        PXLabel->setAlignment(Qt::AlignCenter);
+        PXLabel->setWordWrap(false);
+        PZLabel = new QLabel(POSITION);
+        PZLabel->setObjectName(QString::fromUtf8("PZLabel"));
+        PZLabel->setGeometry(QRect(280, 10, 121, 21));
+        sizePolicy.setHeightForWidth(PZLabel->sizePolicy().hasHeightForWidth());
+        PZLabel->setSizePolicy(sizePolicy);
+        PZLabel->setFont(font1);
+        PZLabel->setLayoutDirection(Qt::LeftToRight);
+        PZLabel->setStyleSheet(QString::fromUtf8("border: 1px solid gray;\n"
+"border-color: black;\n"
+"border-radius: 2px;"));
+        PZLabel->setFrameShape(QFrame::Box);
+        PZLabel->setLineWidth(1);
+        PZLabel->setTextFormat(Qt::AutoText);
+        PZLabel->setAlignment(Qt::AlignCenter);
+        PY_Data = new QLineEdit(POSITION);
+        PY_Data->setObjectName(QString::fromUtf8("PY_Data"));
+        PY_Data->setGeometry(QRect(150, 40, 111, 41));
+        sizePolicy1.setHeightForWidth(PY_Data->sizePolicy().hasHeightForWidth());
+        PY_Data->setSizePolicy(sizePolicy1);
+        PY_Data->setStyleSheet(QString::fromUtf8("border: 1px solid gray;\n"
+"border-color: black;\n"
+"border-radius: 2px;\n"
+"background-color: rgb(0, 0, 100);\n"
+"color: rgb(255, 255, 255);\n"
+"font: 12pt \"Rubik\";"));
+        PY_Data->setAlignment(Qt::AlignCenter);
+        PY_Data->setReadOnly(true);
+        PZ_Data = new QLineEdit(POSITION);
+        PZ_Data->setObjectName(QString::fromUtf8("PZ_Data"));
+        PZ_Data->setGeometry(QRect(280, 40, 121, 41));
+        sizePolicy1.setHeightForWidth(PZ_Data->sizePolicy().hasHeightForWidth());
+        PZ_Data->setSizePolicy(sizePolicy1);
+        PZ_Data->setStyleSheet(QString::fromUtf8("border: 1px solid gray;\n"
+"border-color: black;\n"
+"border-radius: 2px;\n"
+"background-color: rgb(0, 0, 100);\n"
+"color: rgb(255, 255, 255);\n"
+"font: 12pt \"Rubik\";"));
+        PZ_Data->setAlignment(Qt::AlignCenter);
+        PZ_Data->setReadOnly(true);
+        PX_Data = new QLineEdit(POSITION);
+        PX_Data->setObjectName(QString::fromUtf8("PX_Data"));
+        PX_Data->setGeometry(QRect(10, 40, 121, 41));
+        sizePolicy1.setHeightForWidth(PX_Data->sizePolicy().hasHeightForWidth());
+        PX_Data->setSizePolicy(sizePolicy1);
+        PX_Data->setStyleSheet(QString::fromUtf8("border: 1px solid gray;\n"
+"border-color: black;\n"
+"border-radius: 2px;\n"
+"background-color: rgb(0, 0, 100);\n"
+"color: rgb(255, 255, 255);\n"
+"font: 12pt \"Rubik\";"));
+        PX_Data->setAlignment(Qt::AlignCenter);
+        PX_Data->setReadOnly(true);
+        MOTORS = new QGroupBox(centralwidget);
+        MOTORS->setObjectName(QString::fromUtf8("MOTORS"));
+        MOTORS->setGeometry(QRect(440, 520, 401, 191));
+        MOTORS->setFont(font1);
+        MOTORS->setStyleSheet(QString::fromUtf8("QGroupBox {\n"
+"    border: 1px solid gray;\n"
+"    border-color: blue;\n"
+"    border-radius: 5px;\n"
+"	background-color: rgb(0, 0, 255);\n"
+"	font: 700 12pt \"Rubik\";\n"
+"	color: rgb(255, 255, 255);\n"
+"}"));
+        MOTORS->setAlignment(Qt::AlignCenter);
+        MOTORS->setFlat(false);
+        DATA_2 = new QGroupBox(MOTORS);
+        DATA_2->setObjectName(QString::fromUtf8("DATA_2"));
+        DATA_2->setGeometry(QRect(10, 30, 381, 151));
+        DATA_2->setFont(font1);
+        DATA_2->setStyleSheet(QString::fromUtf8("background-color: rgb(0, 0, 0);\n"
+"color: rgb(255, 255, 255);\n"
+"font: 700 12pt \"Rubik\";"));
+        DATA_2->setAlignment(Qt::AlignCenter);
+        LM_Label = new QLabel(DATA_2);
+        LM_Label->setObjectName(QString::fromUtf8("LM_Label"));
+        LM_Label->setGeometry(QRect(10, 10, 361, 21));
+        sizePolicy.setHeightForWidth(LM_Label->sizePolicy().hasHeightForWidth());
+        LM_Label->setSizePolicy(sizePolicy);
+        LM_Label->setFont(font1);
+        LM_Label->setLayoutDirection(Qt::LeftToRight);
+        LM_Label->setStyleSheet(QString::fromUtf8("border: 1px solid gray;\n"
+"border-color: black;\n"
+"border-radius: 2px;"));
+        LM_Label->setFrameShape(QFrame::Box);
+        LM_Label->setFrameShadow(QFrame::Plain);
+        LM_Label->setLineWidth(1);
+        LM_Label->setTextFormat(Qt::AutoText);
+        LM_Label->setAlignment(Qt::AlignCenter);
+        LM_Label->setWordWrap(false);
+        RM_Label = new QLabel(DATA_2);
+        RM_Label->setObjectName(QString::fromUtf8("RM_Label"));
+        RM_Label->setGeometry(QRect(10, 80, 361, 21));
+        sizePolicy.setHeightForWidth(RM_Label->sizePolicy().hasHeightForWidth());
+        RM_Label->setSizePolicy(sizePolicy);
+        RM_Label->setFont(font1);
+        RM_Label->setLayoutDirection(Qt::LeftToRight);
+        RM_Label->setStyleSheet(QString::fromUtf8("border: 1px solid gray;\n"
+"border-color: black;\n"
+"border-radius: 2px;"));
+        RM_Label->setFrameShape(QFrame::Box);
+        RM_Label->setFrameShadow(QFrame::Plain);
+        RM_Label->setLineWidth(1);
+        RM_Label->setTextFormat(Qt::AutoText);
+        RM_Label->setAlignment(Qt::AlignCenter);
+        RM_Label->setWordWrap(false);
+        LMPOW_POS = new QProgressBar(DATA_2);
+        LMPOW_POS->setObjectName(QString::fromUtf8("LMPOW_POS"));
+        LMPOW_POS->setGeometry(QRect(190, 40, 181, 31));
+        LMPOW_POS->setStyleSheet(QString::fromUtf8("background-color: rgb(0, 0, 100);"));
+        LMPOW_POS->setMinimum(0);
+        LMPOW_POS->setValue(0);
+        LMPOW_POS->setTextVisible(true);
+        LMPOW_POS->setOrientation(Qt::Horizontal);
+        LMPOW_POS->setInvertedAppearance(false);
+        LMPOW_POS->setTextDirection(QProgressBar::TopToBottom);
+        RMPOW_POS = new QProgressBar(DATA_2);
+        RMPOW_POS->setObjectName(QString::fromUtf8("RMPOW_POS"));
+        RMPOW_POS->setGeometry(QRect(190, 110, 181, 31));
+        RMPOW_POS->setStyleSheet(QString::fromUtf8("background-color: rgb(0, 0, 100);"));
+        RMPOW_POS->setMinimum(0);
+        RMPOW_POS->setValue(0);
+        RMPOW_POS->setTextVisible(true);
+        RMPOW_POS->setOrientation(Qt::Horizontal);
+        RMPOW_POS->setInvertedAppearance(false);
+        RMPOW_POS->setTextDirection(QProgressBar::TopToBottom);
+        LMPOW_NEG = new QProgressBar(DATA_2);
+        LMPOW_NEG->setObjectName(QString::fromUtf8("LMPOW_NEG"));
+        LMPOW_NEG->setGeometry(QRect(10, 40, 181, 31));
+        LMPOW_NEG->setLayoutDirection(Qt::RightToLeft);
+        LMPOW_NEG->setStyleSheet(QString::fromUtf8("background-color: rgb(0, 0, 100);"));
+        LMPOW_NEG->setMinimum(0);
+        LMPOW_NEG->setValue(0);
+        LMPOW_NEG->setTextVisible(true);
+        LMPOW_NEG->setOrientation(Qt::Horizontal);
+        LMPOW_NEG->setInvertedAppearance(false);
+        LMPOW_NEG->setTextDirection(QProgressBar::TopToBottom);
+        RMPOW_NEG = new QProgressBar(DATA_2);
+        RMPOW_NEG->setObjectName(QString::fromUtf8("RMPOW_NEG"));
+        RMPOW_NEG->setGeometry(QRect(10, 110, 181, 31));
+        RMPOW_NEG->setLayoutDirection(Qt::RightToLeft);
+        RMPOW_NEG->setStyleSheet(QString::fromUtf8("background-color: rgb(0, 0, 100);"));
+        RMPOW_NEG->setMinimum(0);
+        RMPOW_NEG->setValue(0);
+        RMPOW_NEG->setTextVisible(true);
+        RMPOW_NEG->setOrientation(Qt::Horizontal);
+        RMPOW_NEG->setInvertedAppearance(false);
+        RMPOW_NEG->setTextDirection(QProgressBar::TopToBottom);
         MainWindow->setCentralWidget(centralwidget);
         menubar = new QMenuBar(MainWindow);
         menubar->setObjectName(QString::fromUtf8("menubar"));
@@ -990,7 +1179,6 @@ public:
 #if QT_VERSION >= QT_VERSION_CHECK(5, 12, 0)
         palette.setBrush(QPalette::Active, QPalette::PlaceholderText, brush8);
 #endif
-        //palette.setBrush(QPalette::Active, QPalette::Accent, brush2);
         palette.setBrush(QPalette::Inactive, QPalette::WindowText, brush);
         QLinearGradient gradient3(0, 0, 0.99, 1);
         gradient3.setSpread(QGradient::RepeatSpread);
@@ -1027,7 +1215,6 @@ public:
 #if QT_VERSION >= QT_VERSION_CHECK(5, 12, 0)
         palette.setBrush(QPalette::Inactive, QPalette::PlaceholderText, brush8);
 #endif
-        //palette.setBrush(QPalette::Inactive, QPalette::Accent, brush2);
         palette.setBrush(QPalette::Disabled, QPalette::WindowText, brush3);
         QLinearGradient gradient6(0, 0, 0.99, 1);
         gradient6.setSpread(QGradient::RepeatSpread);
@@ -1066,7 +1253,6 @@ public:
 #if QT_VERSION >= QT_VERSION_CHECK(5, 12, 0)
         palette.setBrush(QPalette::Disabled, QPalette::PlaceholderText, brush15);
 #endif
-        //palette.setBrush(QPalette::Disabled, QPalette::Accent, brush2);
         menubar->setPalette(palette);
         menubar->setDefaultUp(false);
         menuConfiguraciones = new QMenu(menubar);
@@ -1089,7 +1275,7 @@ public:
 
     void retranslateUi(QMainWindow *MainWindow)
     {
-        MainWindow->setWindowTitle(QCoreApplication::translate("MainWindow", "Car Management", nullptr));
+        MainWindow->setWindowTitle(QCoreApplication::translate("MainWindow", "Microcontroladores 2024", nullptr));
         actionScanPorts->setText(QCoreApplication::translate("MainWindow", "Scan Ports", nullptr));
         actionConnect_Device->setText(QCoreApplication::translate("MainWindow", "Connect", nullptr));
         actionDisconnect->setText(QCoreApplication::translate("MainWindow", "Disconnect", nullptr));
@@ -1108,9 +1294,8 @@ public:
         COMMAND->setTitle(QCoreApplication::translate("MainWindow", "COMMAND WINDOW", nullptr));
         pushButtonSend->setText(QCoreApplication::translate("MainWindow", "SEND VIA UART", nullptr));
         pushButtonSend_2->setText(QCoreApplication::translate("MainWindow", "SEND VIA UDP", nullptr));
-        DATACOMMANDS->setTitle(QCoreApplication::translate("MainWindow", "DATA COMMANDS", nullptr));
-        CARSENSORS->setTitle(QCoreApplication::translate("MainWindow", "CAR SENSORS INFO", nullptr));
-        ANALOG->setTitle(QCoreApplication::translate("MainWindow", "ANALOG SENSORS", nullptr));
+        CARSENSORS->setTitle(QCoreApplication::translate("MainWindow", "DISTANCE REFERENCES", nullptr));
+        ANALOG->setTitle(QCoreApplication::translate("MainWindow", "VIA TCRT5000", nullptr));
         irLabel_5->setText(QCoreApplication::translate("MainWindow", "IR4", nullptr));
         irLabel_6->setText(QCoreApplication::translate("MainWindow", "IR3", nullptr));
         irLabel_7->setText(QCoreApplication::translate("MainWindow", "IR5", nullptr));
@@ -1128,15 +1313,30 @@ public:
         clearButton->setText(QCoreApplication::translate("MainWindow", "O", nullptr));
         groupBox_15->setTitle(QCoreApplication::translate("MainWindow", "BUTTON", nullptr));
         EstadoBotonLabel->setText(QCoreApplication::translate("MainWindow", "UP", nullptr));
-        MPU6050->setTitle(QCoreApplication::translate("MainWindow", "ACCELEROMETER AND GYROSCOPE", nullptr));
-        DATA->setTitle(QCoreApplication::translate("MainWindow", "DATA VIA MPU6050", nullptr));
-        GXLabel->setText(QCoreApplication::translate("MainWindow", "GYR (X)", nullptr));
-        GYLabel->setText(QCoreApplication::translate("MainWindow", "GYR (Y)", nullptr));
-        GZLabel->setText(QCoreApplication::translate("MainWindow", "GYR (Z)", nullptr));
+        MPU6050->setTitle(QCoreApplication::translate("MainWindow", "MPU6050 DATA", nullptr));
+        ACCELERATION->setTitle(QString());
         AYLabel->setText(QCoreApplication::translate("MainWindow", "ACC (Y)", nullptr));
         AXLabel->setText(QCoreApplication::translate("MainWindow", "ACC (X)", nullptr));
         AZLabel->setText(QCoreApplication::translate("MainWindow", "ACC (Z)", nullptr));
-        ACCz->setText(QString());
+        AZ_Data->setText(QString());
+        VELOCITY->setTitle(QString());
+        VYLabel->setText(QCoreApplication::translate("MainWindow", "VEL (Y)", nullptr));
+        VXLabel->setText(QCoreApplication::translate("MainWindow", "VEL (X)", nullptr));
+        VZLabel->setText(QCoreApplication::translate("MainWindow", "VEL (Z)", nullptr));
+        VZ_Data->setText(QString());
+        POSITION->setTitle(QString());
+        PYLabel->setText(QCoreApplication::translate("MainWindow", "POS (Y)", nullptr));
+        PXLabel->setText(QCoreApplication::translate("MainWindow", "POS (X)", nullptr));
+        PZLabel->setText(QCoreApplication::translate("MainWindow", "POS (Z)", nullptr));
+        PZ_Data->setText(QString());
+        MOTORS->setTitle(QCoreApplication::translate("MainWindow", "MOTORS", nullptr));
+        DATA_2->setTitle(QString());
+        LM_Label->setText(QCoreApplication::translate("MainWindow", "LEFT MOTOR POWER", nullptr));
+        RM_Label->setText(QCoreApplication::translate("MainWindow", "RIGHT MOTOR POWER", nullptr));
+        LMPOW_POS->setFormat(QCoreApplication::translate("MainWindow", "%p%", nullptr));
+        RMPOW_POS->setFormat(QCoreApplication::translate("MainWindow", "%p%", nullptr));
+        LMPOW_NEG->setFormat(QCoreApplication::translate("MainWindow", "%p%", nullptr));
+        RMPOW_NEG->setFormat(QCoreApplication::translate("MainWindow", "%p%", nullptr));
         menuConfiguraciones->setTitle(QCoreApplication::translate("MainWindow", "UART", nullptr));
     } // retranslateUi
 
