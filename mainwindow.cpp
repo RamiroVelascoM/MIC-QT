@@ -1,4 +1,5 @@
 #include "mainwindow.h"
+#include "qserialportinfo.h"
 #include "ui_mainwindow.h"
 #include <QMessageBox>
 
@@ -22,11 +23,11 @@ MainWindow::MainWindow(QWidget *parent)
 
     connect(ui->pushButtonSend,&QPushButton::clicked,this,&MainWindow::sendDataSerial);
     connect(ui->pushButtonSend_2,&QPushButton::clicked,this,&MainWindow::sendDataUDP);
-    connect(serial,&QSerialPort::readyRead,this,&MainWindow::dataRecived);
-    connect(ui->actionScanPorts,&QAction::triggered,settingPorts,&QWidget::showNormal);
-    connect(ui->actionConnect_Device, &QAction::triggered,this,&MainWindow::openSerialPorts);
-    connect(ui->actionDisconnect,&QAction::triggered,this,&MainWindow::closeSerialPorts);
-    connect(ui->actionExit,&QAction::triggered,this,&MainWindow::close);
+    //connect(serial,&QSerialPort::readyRead,this,&MainWindow::dataRecived);
+    //connect(ui->Open_SERIAL,&QPushButton::clicked,settingPorts,&QWidget::showNormal);
+    //connect(ui->actionConnect_Device, &QAction::triggered,this,&MainWindow::openSerialPorts);
+    //connect(ui->actionDisconnect,&QAction::triggered,this,&MainWindow::closeSerialPorts);
+    //connect(ui->actionExit,&QAction::triggered,this,&MainWindow::close);
     connect(UdpSocket1,&QUdpSocket::readyRead,this,&MainWindow::OnUdpRxData);
     connect(QTimer1, &QTimer::timeout, this, &MainWindow::OnQTimer1);
 
@@ -36,18 +37,61 @@ MainWindow::MainWindow(QWidget *parent)
     ui->comboBoxCom->addItem("MPU 6050 DATA", 0xF3);
     ui->comboBoxCom->addItem("DISPLAY DATA", 0xF4);
     ui->comboBoxCom->addItem("RECEIVE MOTORS", 0xF5);
-    ui->comboBoxCom->addItem("TEST MOTORS", 0xF6);
+    ui->comboBoxCom->addItem("SEND MOTORS", 0xF6);
 
-    myMPU.Ax = 0; myMPU.Ay = 0; myMPU.Az = 0;
-    myMPU.Vx = 0; myMPU.Vy = 0; myMPU.Vz = 0;
-    myMPU.Px = 0; myMPU.Py = 0; myMPU.Pz = 0;
-    myMPU.dt = 10/1000;
+    initMPU(&myMPU);
+    localTimeRef = dt.currentDateTime().time().minute();
+
+    // COMUNICACION USB
+    serial = new QSerialPort(this);
+    connect(serial,&QSerialPort::readyRead, this,&MainWindow::dataRecived);
+    ui->comboBox->installEventFilter(this);
+    //header=0;
+
+    // BOTONES E IMAGENES DEL HMI
+    botones = new QButtonGroup(this);
+    botones->setExclusive(true);
+    botones->addButton(ui->Home_Button, 0);
+    botones->addButton(ui->Comm_Button, 1);
+    botones->addButton(ui->Data_Button, 2);
+    botones->addButton(ui->GPS_Button, 3);
+    connect(botones,&QButtonGroup::buttonClicked,this,&MainWindow::buttons);
+    ui->stackedWidget->setCurrentIndex(0);
 }
 
 MainWindow::~MainWindow()
 {
     delete ui;
-    //delete QPaintBox1;
+    delete QPaintBox1;
+}
+
+void MainWindow::buttons(QAbstractButton *button)
+{
+    int indexPag = botones->id(button);
+    ui->stackedWidget->setCurrentIndex(indexPag);
+}
+
+bool MainWindow::eventFilter(QObject *watched, QEvent *event)
+{
+    if(watched == ui->comboBox)
+    {
+        if (event->type() == QEvent::MouseButtonPress)
+        {
+            ui->comboBox->clear();
+            QSerialPortInfo SerialPortInfo1;
+
+            for(int i=0;i<SerialPortInfo1.availablePorts().count();i++)
+                ui->comboBox->addItem(SerialPortInfo1.availablePorts().at(i).portName());
+
+            return QMainWindow::eventFilter(watched, event);
+        }
+        else {
+            return false;
+        }
+    }
+    else{
+        return QMainWindow::eventFilter(watched, event);
+    }
 }
 
 void MainWindow::openSerialPorts()
@@ -170,7 +214,7 @@ void MainWindow::dataRecived() //!< RECIBIR DATOS POR SERIAL
             str = str +"{" + QString("%1").arg(incomingBuffer[i],2,16,QChar('0')) + "}";
     }
     str = str.toUpper();
-    //ui->textBrowser->append("BLUEPILL (SERIE) -> (" + str + ")");
+    ui->textBrowser->append("BLUEPILL (SERIE) -> (" + str + ")");
 
     for(int i=0;i<count; i++){
         switch (estadoProtocolo) {
@@ -260,7 +304,7 @@ void MainWindow::OnUdpRxData(){ //!< RECIBIR DATOS POR UDP
             str = str +"{" + QString("%1").arg(incomingBuffer[i],2,16,QChar('0')) + "}";
     }
     str = str.toUpper();
-    //ui->textBrowser->append("BLUEPILL (UDP) -> (" + str + ")");
+    ui->textBrowser->append("BLUEPILL (UDP) -> (" + str + ")");
     ui->lineEditIP->setText(RemoteAddress.toString().right((RemoteAddress.toString().length())-7));
     ui->lineEditPort->setText(QString().number(RemotePort,10));
 
@@ -338,8 +382,8 @@ void MainWindow::decodeData(uint8_t *datosRx, uint8_t source)
 {
     //int32_t length = sizeof(*datosRx)/sizeof(datosRx[0]);
     uint8_t i=0;
-    bool ok;
     _work w;
+    QString str="";
 
     /*
     for(int i = 1; i<length; i++){
@@ -365,7 +409,6 @@ void MainWindow::decodeData(uint8_t *datosRx, uint8_t source)
         */
         break;
     case ALIVE:
-        /*
         if(datosRx[2]==ACKNOWLEDGE){
             if(source == SERIE)
                 str = (QString("BLUEPILL (PC): I'M ALIVE at %0:%1:%2").arg(dt.currentDateTime().time().hour(), 2, 10, QChar('0').toUpper()).arg(dt.currentDateTime().time().minute(), 2, 10, QChar('0').toUpper()).arg(dt.currentDateTime().time().second(), 2, 10, QChar('0').toUpper()));
@@ -375,8 +418,9 @@ void MainWindow::decodeData(uint8_t *datosRx, uint8_t source)
         }else{
             str = (QString("BLUEPILL ALIVE (NO ACKNOWLEDGE) at %0:%1:%2").arg(dt.currentDateTime().time().hour(), 2, 10, QChar('0').toUpper()).arg(dt.currentDateTime().time().minute(), 2, 10, QChar('0').toUpper()).arg(dt.currentDateTime().time().second(), 2, 10, QChar('0').toUpper()));
         }
-        ui->txtBrowserCMD->append(str);
-        */
+
+        ui->textBrowser->append(str);
+
         ui->AliveLabel->setStyleSheet("border: 1px solid gray;border-color: black;border-radius: 2px;background-color: green;color: white;");
         ui->AliveLabel->setText("YES");
         alive = true;
@@ -390,20 +434,11 @@ void MainWindow::decodeData(uint8_t *datosRx, uint8_t source)
         ui->FirmwareLabel->setText(firmwareCadena);
         break;
     case ANALOG_IR:
-        /*
-        for (uint8_t i=0; i<16; i+=2) {
-            //.u16[0] = 0;
-            w.u8[0] = datosRx[i+2];
-            w.u8[1] = datosRx[i+3];
-            dataIR[i/2] = w.u32;
-        }
-        */
         for (uint8_t i=0; i<8; i++){
             dataIR[i]=(100-datosRx[i+2]);
         }
         //ui->txtBrowserCMD->append(QString("BLUEPILL (PC): NEW ANALOG IR's DATA at %0:%1:%2").arg(dt.currentDateTime().time().hour(), 2, 10, QChar('0').toUpper()).arg(dt.currentDateTime().time().minute(), 2, 10, QChar('0').toUpper()).arg(dt.currentDateTime().time().second(), 2, 10, QChar('0').toUpper()));
         ui->ir_0->setText(QString("%1").arg(dataIR[0], 2, 10, QChar('0')));
-        /*
         ui->ir_1->setText(QString("%1").arg(dataIR[1], 2, 10, QChar('0')));
         ui->ir_2->setText(QString("%1").arg(dataIR[2], 2, 10, QChar('0')));
         ui->ir_3->setText(QString("%1").arg(dataIR[3], 2, 10, QChar('0')));
@@ -411,46 +446,61 @@ void MainWindow::decodeData(uint8_t *datosRx, uint8_t source)
         ui->ir_5->setText(QString("%1").arg(dataIR[5], 2, 10, QChar('0')));
         ui->ir_6->setText(QString("%1").arg(dataIR[6], 2, 10, QChar('0')));
         ui->ir_7->setText(QString("%1").arg(dataIR[7], 2, 10, QChar('0')));
-        */
         break;
     case MPU_6050:
+        /*
         for (uint8_t i=0; i<12; i+=2) {
-            w.i32 = 0;
+            w.u32 = 0;
             w.u8[0] = datosRx[i+2];
             w.u8[1] = datosRx[i+3];
-            myMPUdata[i/2] = ((int16_t)w.i32);
+            myMPUdata[i/2] = ((int16_t)w.u32);
         }
-        // ACELERACION: a
-        myMPU.Ax = (myMPUdata[0]/16384.0)*9.8;  // PASADO A M/S^2
+        myMPU.Ax = (myMPUdata[0]/16384.0)*9.8;
         myMPU.Ay = (myMPUdata[1]/16384.0)*9.8;
         myMPU.Az = (myMPUdata[2]/16384.0)*9.8;
+        myMPU.Gx = (myMPUdata[3]/131.0);
+        myMPU.Gy = (myMPUdata[4]/131.0);
+        myMPU.Gz = (myMPUdata[5]/131.0);
+        */
+        decodeMPUdata(datosRx, 2, &myMPU);
+
+        myMPU.Ax = filter_FMM(&myAx, myMPU.Ax);
+        myMPU.Ay = filter_FMM(&myAy, myMPU.Ay);
+        myMPU.Az = filter_FMM(&myAz, myMPU.Az);
+        myMPU.Gx = filter_FMM(&myGx, myMPU.Gx);
+        myMPU.Gy = filter_FMM(&myGy, myMPU.Gy);
+        myMPU.Gz = filter_FMM(&myGz, myMPU.Gz);
+
+        getYPR(&myMPU, 0.01);
+        getVelocityMPU(&myMPU, 0.01);
+        getPositionMPU(&myMPU, 0.01);
+
         ui->AX_Data->setText(QString("%1").arg(myMPU.Ax, 1, 'f', 3));
         ui->AY_Data->setText(QString("%1").arg(myMPU.Ay, 1, 'f', 3));
         ui->AZ_Data->setText(QString("%1").arg(myMPU.Az, 1, 'f', 3));
-        // VELOCIDAD: v = (a*dt)+v0
-        myMPU.Vx = (myMPU.Ax * myMPU.dt) + 0;//myMPU.Vx;
-        myMPU.Vy = (myMPU.Ay * myMPU.dt) + 0;//myMPU.Vy;
-        myMPU.Vz = (myMPU.Az * myMPU.dt) + 0;//myMPU.Vz;
+
+        ui->GX_Data->setText(QString("%1").arg(myMPU.Gx, 1, 'f', 3));
+        ui->GY_Data->setText(QString("%1").arg(myMPU.Gy, 1, 'f', 3));
+        ui->GZ_Data->setText(QString("%1").arg(myMPU.Gz, 1, 'f', 3));
+
+        ui->Roll_Data->setText(QString("%1").arg(myMPU.Roll, 1, 'f', 3));
+        ui->Pitch_Data->setText(QString("%1").arg(myMPU.Pitch, 1, 'f', 3));
+        ui->Yaw_Data->setText(QString("%1").arg(myMPU.Yaw, 1, 'f', 3));
+
         ui->VX_Data->setText(QString("%1").arg(myMPU.Vx, 1, 'f', 3));
         ui->VY_Data->setText(QString("%1").arg(myMPU.Vy, 1, 'f', 3));
         ui->VZ_Data->setText(QString("%1").arg(myMPU.Vz, 1, 'f', 3));
-        // POSICION: p = (a/2*dt^2) + (v0*dt) + p0
-        /*
-        myMPU.Px = ((0.5* myMPU.Ax * myMPU.dt * myMPU.dt) + (myMPU.Vx*myMPU.dt) + myMPU.Px)*100;
-        myMPU.Py = ((0.5* myMPU.Ax * myMPU.dt * myMPU.dt) + (myMPU.Vx*myMPU.dt) + myMPU.Px)*100;
-        myMPU.Pz = ((0.5* myMPU.Ax * myMPU.dt * myMPU.dt) + (myMPU.Vx*myMPU.dt) + myMPU.Px)*100;
-        ui->VX_Data->setText(QString("%1").arg(myMPU.Vx, 1, 'f', 3));
-        ui->VY_Data->setText(QString("%1").arg(myMPU.Vy, 1, 'f', 3));
-        ui->VZ_Data->setText(QString("%1").arg(myMPU.Vz, 1, 'f', 3));
-        */
-        //ui->txtBrowserCMD->append(QString("BLUEPILL (PC): NEW MPU6050 DATA at %0:%1:%2").arg(dt.currentDateTime().time().hour(), 2, 10, QChar('0').toUpper()).arg(dt.currentDateTime().time().minute(), 2, 10, QChar('0').toUpper()).arg(dt.currentDateTime().time().second(), 2, 10, QChar('0').toUpper()));
+
+        ui->PX_Data->setText(QString("%1").arg(myMPU.Px, 1, 'f', 3));
+        ui->PY_Data->setText(QString("%1").arg(myMPU.Py, 1, 'f', 3));
+        ui->PZ_Data->setText(QString("%1").arg(myMPU.Pz, 1, 'f', 3));
         break;
-    case MOTORES_N20:
+    case RECEIVE_N20:
         powerMotorLEFT = (int8_t)datosRx[i+2];
         powerMotorRIGHT = (int8_t)datosRx[i+3];
 
         if (powerMotorLEFT < 0){
-            ui->LMPOW_NEG->setValue(-powerMotorLEFT);
+        ui->LMPOW_NEG->setValue(-powerMotorLEFT);
             ui->LMPOW_POS->setValue(0);
         }else{
             ui->LMPOW_POS->setValue(powerMotorLEFT);
@@ -464,19 +514,11 @@ void MainWindow::decodeData(uint8_t *datosRx, uint8_t source)
             ui->RMPOW_NEG->setValue(0);
         }
         break;
-    case TEST_MOTORES:
-        w.i32 = QInputDialog::getInt(this, "MOTOR IZQUIERDO", "Potencia (-%100 a %100): ", 0, -100, 100, 1, &ok);
-        if (!ok)
-            break;
-        powerMotorLEFT = (int8_t)w.i32;
-        w.i32 = QInputDialog::getInt(this, "MOTOR DERECHO", "Potencia (-%100 a %100): ", 0, -100, 100, 1, &ok);
-        if (!ok)
-            break;
-        powerMotorLEFT = (int8_t)w.i32;
-        auxComand = TEST_MOTORES;
-        isASelectedCmd = true;
-        sendDataSerial();
-        sendDataUDP();
+    case BUTTONS:
+        if (datosRx[i+2])
+            ui->EstadoBotonLabel->setText("UP");
+        else
+            ui->EstadoBotonLabel->setText("DOWN");
         break;
     default:
         //str = (QString("BLUEPILL: UNKNOWN COMMAND at %0:%1:%2").arg(dt.currentDateTime().time().hour(), 2, 10, QChar('0').toUpper()).arg(dt.currentDateTime().time().minute(), 2, 10, QChar('0').toUpper()).arg(dt.currentDateTime().time().second(), 2, 10, QChar('0').toUpper()));
@@ -491,6 +533,7 @@ void MainWindow::sendDataSerial()
     _work w;
     unsigned char dato[256];
     unsigned char indice=0, chk=0;
+    bool ok;
 
     dato[indice++]='U';
     dato[indice++]='N';
@@ -509,7 +552,8 @@ void MainWindow::sendDataSerial()
     case FIRMWARE:
     case ANALOG_IR:
     case MPU_6050:
-    case MOTORES_N20:
+    case RECEIVE_N20:
+    case BUTTONS:
         dato[indice++] = cmdId;
         dato[NBYTES] = 0x02;
         break;
@@ -521,16 +565,17 @@ void MainWindow::sendDataSerial()
         dato[indice++] = w.u8[0];
         dato[NBYTES] = 0x04;
         break;
-    case TEST_MOTORES:
-        /*
-        dato[indice++] = cmdId;
-        w.u8[0] = (uint8_t)powerMotorLEFT;
-        dato[indice++] = w.u8[0];
-        w.u8[0] = (uint8_t)powerMotorRIGHT;
-        dato[indice++] = w.u8[0];
-        ui->textBrowser->setText(QString("Sent MI: %0, Sent MD: %0 \n").arg(powerMotorLEFT).arg(powerMotorRIGHT));
+    case SEND_N20:
+        dato[indice++] = SEND_N20;
+        w.i8[0] = QInputDialog::getInt(this, "MOTOR L: SETTINGS", "Potencia: Motor Izquierdo ", 0, -100, 100, 1, &ok);
+        if (!ok)
+            break;
+        dato[indice++] = w.i8[0];
+        w.i8[1] = QInputDialog::getInt(this, "MOTOR R: SETTINGS", "Potencia: Motor Derecho ", 0, -100, 100, 1, &ok);
+        if (!ok)
+            break;
+        dato[indice++] = w.i8[1];
         dato[NBYTES] = 0x04;
-        */
         break;
     default:
         return;
@@ -555,6 +600,7 @@ void MainWindow::sendDataUDP()
     unsigned char indice=0, chk=0;
     QString str;
     int puerto=0;
+    bool ok;
 
     dato[indice++]='U';
     dato[indice++]='N';
@@ -573,7 +619,8 @@ void MainWindow::sendDataUDP()
     case FIRMWARE:
     case ANALOG_IR:
     case MPU_6050:
-    case MOTORES_N20:
+    case RECEIVE_N20:
+    case BUTTONS:
         dato[indice++] = cmdId;
         dato[NBYTES] = 0x02;
         break;
@@ -583,6 +630,18 @@ void MainWindow::sendDataUDP()
         dato[indice++] = w.u8[0];
         w.u8[0] = (uint8_t)dt.currentDateTime().time().minute();
         dato[indice++] = w.u8[0];
+        dato[NBYTES] = 0x04;
+        break;
+    case SEND_N20:
+        dato[indice++] = SEND_N20;
+        w.i8[0] = QInputDialog::getInt(this, "MOTOR L: SETTINGS", "Potencia: Motor Izquierdo ", 0, -100, 100, 1, &ok);
+        if (!ok)
+            break;
+        dato[indice++] = w.i8[0];
+        w.i8[1] = QInputDialog::getInt(this, "MOTOR R: SETTINGS", "Potencia: Motor Derecho ", 0, -100, 100, 1, &ok);
+        if (!ok)
+            break;
+        dato[indice++] = w.i8[1];
         dato[NBYTES] = 0x04;
         break;
     default:
@@ -610,39 +669,27 @@ void MainWindow::sendDataUDP()
             str = str +"{" + QString("%1").arg(dato[i],2,16,QChar('0')) + "}";
     }
     str = str.toUpper();
-    //ui->textBrowser->append("QT -> ( " + str + " )");
+    ui->textBrowser->append("QT -> ( " + str + " )");
 }
 
 void MainWindow::OnQTimer1()
 {
-    if (timeADCdata >= 10) { // 500 MS
+    if (timeADCdata >= 50) { // 500 MS
+        sendCMD(ANALOG_IR);
+        //sendCMD(MOTORES_N20);
+        sendCMD(ALIVE);
         lecturaSensores();
         timeADCdata = 0;
-
-        auxComand = MOTORES_N20;
-        isASelectedCmd = true;
-        sendDataSerial();
-        isASelectedCmd = true;
-        sendDataUDP();
     } else
         timeADCdata++;
 
-    if (timeMPUdata >= 1) { // 100 MS
-        auxComand = MPU_6050;
-        isASelectedCmd = true;
-        sendDataSerial();
-        isASelectedCmd = true;
-        sendDataUDP();
-        timeMPUdata = 0;
-    } else
-        timeMPUdata++;
+    sendCMD(MPU_6050);
 
     if (timeDISPLAYdata >= 500) { // 5 SEGUNDOS
-        auxComand = DISPLAY_SSD1306;
-        isASelectedCmd = true;
-        sendDataSerial();
-        isASelectedCmd = true;
-        sendDataUDP();
+        if (localTimeRef != dt.time().minute()){
+            localTimeRef = dt.time().minute();
+            sendCMD(DISPLAY_SSD1306);
+        }
         timeDISPLAYdata = 0;
     } else
         timeDISPLAYdata++;
@@ -661,10 +708,16 @@ void MainWindow::OnQTimer1()
     } else
         aliveTimeOut++;
 
-    /*
-    if (radarDrawing)
-            RadarRun();
-    */
+    if (widgetSize.width != ui->positionRadar->width() || widgetSize.height != ui->positionRadar->height()){
+        widgetSize.width = ui->positionRadar->width();
+        widgetSize.height = ui->positionRadar->height();
+        QPaintBox1->resize(widgetSize.width, widgetSize.height);
+        DrawMotionMPU();
+    }
+
+    if (timeADCdata >= 10) { // 100 ms
+        DrawMovement();
+    }
 }
 
 void MainWindow::inicializaciones()
@@ -672,26 +725,22 @@ void MainWindow::inicializaciones()
     alive = false;
     aliveTimeOut = 0;
     recibirConfig = true;
-    //DibujarFondoRadar();
+    sendCMD(DISPLAY_SSD1306);
 }
 
 void MainWindow::lecturaSensores()
 {
+    /*
     auxComand = ANALOG_IR;
     isASelectedCmd = true;
     sendDataSerial();
     isASelectedCmd = true;
     sendDataUDP();
+    */
 
     if (alive && recibirConfig) {
         recibirConfig = false;
         ui->FirmwareLabel->setText("2024-v1");
-    }
-
-    if (connectionType == SERIE) {
-        auxComand = ALIVE;
-        isASelectedCmd = true;
-        sendDataSerial();
     }
 }
 
@@ -710,16 +759,82 @@ void MainWindow::on_radarButton_clicked()
 
 }
 
-void MainWindow::DibujarFondoRadar() {
+void MainWindow::DrawMotionMPU(){
+    QPen pen;
+    QBrush brush;
+    QPainter painter(QPaintBox1->getCanvas());
+
+    pen.setWidth(2);
+    pen.setColor(QColor(0, 0, 0, 255));
+    brush.setColor(QColor(0, 0, 100, 255)); //(QColor(0, 0, 0, 255));
+    brush.setStyle(Qt::BrushStyle::SolidPattern);
+    painter.setPen(pen);
+    painter.setBrush(brush);
+    painter.drawRect(0, 0, widgetSize.width, widgetSize.height);
+
+    pen.setWidth(2);
+    pen.setColor(QColor(0, 0, 255, 255));
+    brush.setColor(QColor(0, 0, 255, 255));
+    brush.setStyle(Qt::BrushStyle::NoBrush);
+    painter.setBrush(brush);
+    painter.setPen(pen);
+
+    painter.translate(ui->positionRadar->width()/2, ui->positionRadar->height()/2);
+    painter.drawEllipse(-widgetSize.width/2, -widgetSize.height/2, widgetSize.width, widgetSize.height);
+    painter.drawEllipse(-widgetSize.width/4, -widgetSize.height/4, widgetSize.width/2, widgetSize.height/2);
+    painter.drawEllipse(-widgetSize.width/8, -widgetSize.height/8, widgetSize.width/4, widgetSize.height/4);
+    painter.drawEllipse(-3*widgetSize.width/8, -3*widgetSize.height/8, 3*widgetSize.width/4, 3*widgetSize.height/4);
+
+    painter.drawLine(-widgetSize.width/2, 0, widgetSize.width/2, 0);
+    painter.drawLine(0, -widgetSize.height/2, 0, widgetSize.height/2);
+    /*
+    for(int i=0; i<8; i++){
+        //painter.drawLine(x1 y1 x2 y2)
+        painter.drawLine(-widgetSize.width/2, 0, widgetSize.width/2, 0);
+        painter.drawLine(-widgetSize.width/2, -widgetSize.height/2, widgetSize.width/2, widgetSize.height/2);
+        //painter.drawLine(-widgetSize.width, -widgetSize.height, widgetSize.width, widgetSize.height);
+        //painter.drawLine(0, -ui->widget->width(), 0, ui->widget->height());
+        painter.rotate(45);
+    }
+    */
+    QPaintBox1->update();
 
 }
 
-void MainWindow::RadarRun()
-{
+void MainWindow::DrawMovement(){
+    DrawMotionMPU();
+    QPen pen;
+    QBrush brush;
+    QPainter painter(QPaintBox1->getCanvas());
 
-}
+    pen.setWidth(3);
+    //pen.setColor(QColor(0, 232, 0, 255));
+    //brush.setColor(QColor(0, 232, 0, 255));
+    //pen.setColor(QColor(0, 232, 232, 255));
+    //brush.setColor(QColor(0, 232, 232, 255));
+    pen.setColor(QColor(255, 255, 255, 255));
+    brush.setColor(QColor(255, 255, 255, 255));
+    brush.setStyle(Qt::BrushStyle::NoBrush);
+    painter.setBrush(brush);
+    painter.setPen(pen);
 
-void MainWindow::DibujarDeteccion() {
+    //painter.translate(0, ui->widget->height()/2);
+
+    //painter.drawPoint(samples, -(int)acceleration[samples]*25);
+
+    painter.translate(ui->positionRadar->width()/2, ui->positionRadar->height()/2);
+
+    painter.drawLine(0, 0, 150*cos(myMPU.Yaw * M_PI/180 + M_PI/2), 150*-sin(myMPU.Yaw * M_PI/180 + M_PI/2));
+
+    pen.setWidth(20);
+    pen.setColor(QColor(0, 255, 255, 255));
+    painter.setPen(pen);
+
+    //painter.translate(ui->positionRadar->width()/2, ui->positionRadar->height()/2);
+
+    painter.drawPoint(myMPU.Px*2.0, myMPU.Py*2.0);
+
+    QPaintBox1->update();
 
 }
 
@@ -755,6 +870,43 @@ void MainWindow::cleanDataInfo()
     ui->RMPOW_POS->setValue(0);
 }
 
+void MainWindow::sendCMD(uint8_t CMD){
+    auxComand = CMD;
+    isASelectedCmd = true;
+    sendDataSerial();
+    sendDataUDP();
+}
+
 int16_t MainWindow::integrate(uint16_t newValue, int16_t lastValue, uint8_t condition, uint8_t timeInterval){
     return (((newValue - lastValue)/timeInterval)+condition);
 }
+
+void MainWindow::on_Open_SERIAL_clicked()
+{
+    if(serial->isOpen())
+    {
+        serial->close();
+        //QTimer1->stop();
+        //timeCounter = 0;
+        ui->Open_SERIAL->setText("CONNECT");
+    }
+    else
+    {
+        if(ui->comboBox->currentText() == "")
+            return;
+
+        serial->setPortName(ui->comboBox->currentText());
+        serial->setBaudRate(115200);
+        serial->setParity(QSerialPort::NoParity);
+        serial->setDataBits(QSerialPort::Data8);
+        serial->setStopBits(QSerialPort::OneStop);
+        serial->setFlowControl(QSerialPort::NoFlowControl);
+        //QTimer1->start(20);
+
+        if(serial->open(QSerialPort::ReadWrite))
+        {
+            ui->Open_SERIAL->setText("DISCONNECT");
+        }
+    }
+}
+

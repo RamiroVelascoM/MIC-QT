@@ -7,7 +7,7 @@
     <x>0</x>
     <y>0</y>
     <width>455</width>
-    <height>270</height>
+    <height>285</height>
    </rect>
   </property>
   <property name="windowTitle">
@@ -16,6 +16,10 @@
   <property name="windowIcon">
    <iconset>
     <normaloff>car.ico</normaloff>car.ico</iconset>
+  </property>
+  <property name="styleSheet">
+   <string notr="true">background-color: rgb(225, 225, 225);
+color: rgb(0, 0, 0);</string>
   </property>
   <layout class="QGridLayout" name="gridLayout_3">
    <item row="0" column="1">

@@ -57,10 +57,12 @@ public:
     {
         if (SettingsDialog->objectName().isEmpty())
             SettingsDialog->setObjectName(QString::fromUtf8("SettingsDialog"));
-        SettingsDialog->resize(455, 270);
+        SettingsDialog->resize(455, 285);
         QIcon icon;
         icon.addFile(QString::fromUtf8("car.ico"), QSize(), QIcon::Normal, QIcon::Off);
         SettingsDialog->setWindowIcon(icon);
+        SettingsDialog->setStyleSheet(QString::fromUtf8("background-color: rgb(225, 225, 225);\n"
+"color: rgb(0, 0, 0);"));
         gridLayout_3 = new QGridLayout(SettingsDialog);
         gridLayout_3->setObjectName(QString::fromUtf8("gridLayout_3"));
         parametersBox = new QGroupBox(SettingsDialog);

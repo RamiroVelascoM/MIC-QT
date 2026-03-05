@@ -18,6 +18,8 @@
 #include <QPainter>
 #include <QStyle>
 #include <qlcdnumber.h>
+#include <mpu6050_qt.h>
+#include <QButtonGroup>
 
 QT_BEGIN_NAMESPACE
 namespace Ui { class MainWindow; }
@@ -32,6 +34,10 @@ public:
     ~MainWindow();
 
 private slots:
+    void buttons(QAbstractButton *button);
+
+    bool eventFilter(QObject *watched, QEvent *event);
+
     void openSerialPorts();
 
     void closeSerialPorts();
@@ -58,17 +64,20 @@ private slots:
 
     void on_radarButton_clicked();
 
-    void DibujarFondoRadar();
+    void DrawMotionMPU();
 
-    void RadarRun();
-
-    void DibujarDeteccion();
+    void DrawMovement();
 
     void on_clearButton_clicked();
+
+    void sendCMD(uint8_t CMD);
 
     void cleanDataInfo();
 
     int16_t integrate(uint16_t newValue, int16_t lastValue, uint8_t condition, uint8_t timeInterval);
+
+    void on_Open_SERIAL_clicked();
+
 private:
 
     Ui::MainWindow *ui;
@@ -104,8 +113,9 @@ private:
         ANALOG_IR = 0xF2,
         MPU_6050 = 0xF3,
         DISPLAY_SSD1306 = 0xF4,
-        MOTORES_N20 = 0xF5,
-        TEST_MOTORES = 0xF6,
+        RECEIVE_N20 = 0xF5,
+        SEND_N20 = 0xF6,
+        BUTTONS = 0xF7,
         UNKNOWNCOMMAND = 0xFF
     }_eCmd;
 
@@ -143,24 +153,19 @@ private:
     }_udat;
 
     typedef struct{
-        double Ax;
-        double Ay;
-        double Az;
-        double Vx;
-        double Vy;
-        double Vz;
-        double Px;
-        double Py;
-        double Pz;
-        uint8_t dt;
-    }_sMPU;
+        int32_t width;
+        int32_t height;
+    }_sWidgetSize;
+
+    _sWidgetSize widgetSize;
+    QButtonGroup *botones;
 
     /******TCRT5000******/
     uint8_t dataIR[8];
 
     /******MPU6050*******/
-    int16_t myMPUdata[6];
     _sMPU myMPU;
+    _sFMM myAx, myAy, myAz, myGx, myGy, myGz;
 
     /*TIMER*/
     QTimer *QTimer1;
@@ -168,6 +173,7 @@ private:
     uint8_t timeMPUdata = 0;
     uint16_t timeDISPLAYdata = 0;
     uint16_t aliveTimeOut = 0;
+    uint8_t localTimeRef = 0;
 
     /*MOTORES*/
     int8_t powerMotorLEFT = 0;

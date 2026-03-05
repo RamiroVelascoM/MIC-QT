@@ -1,0 +1,5 @@
+<RCC>
+    <qresource prefix="/new/icons">
+        <file>trazado_pcb.png</file>
+    </qresource>
+</RCC>

@@ -1,0 +1,6 @@
+<RCC>
+    <qresource prefix="/">
+        <file>../../../../../../Desktop/Facultad/Cuarto año/MODULO 7/Microcontroladores/Practica/Proyecto/Recursos/trazado_pcb.png</file>
+        <file>trazado_pcb.qrc</file>
+    </qresource>
+</RCC>

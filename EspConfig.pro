@@ -11,11 +11,13 @@ CONFIG += c++11
 SOURCES += \
     main.cpp \
     mainwindow.cpp \
+    mpu6050_qt.cpp \
     qpaintbox.cpp \
     settingsdialog.cpp
 
 HEADERS += \
     mainwindow.h \
+    mpu6050_qt.h \
     qpaintbox.h \
     settingsdialog.h
 
@@ -29,3 +31,6 @@ RC_ICONS = conect.ico
 qnx: target.path = /tmp/$${TARGET}/bin
 else: unix:!android: target.path = /opt/$${TARGET}/bin
 !isEmpty(target.path): INSTALLS += target
+
+RESOURCES += \
+    recursos_proyecto.qrc
